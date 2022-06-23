@@ -1,0 +1,53 @@
+[
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-MMD",
+   "-MF",
+   "./target/dep/another.d",
+   "-c",
+   "-o",
+   "target/obj/another.o",
+   "src/another.c"
+  ],
+  "file": "src/another.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-MMD",
+   "-MF",
+   "./target/dep/final.d",
+   "-c",
+   "-o",
+   "target/obj/final.o",
+   "src/final.c"
+  ],
+  "file": "src/final.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-MMD",
+   "-MF",
+   "./target/dep/main.d",
+   "-c",
+   "-o",
+   "target/obj/main.o",
+   "src/main.c"
+  ],
+  "file": "src/main.c"
+ }
+]
