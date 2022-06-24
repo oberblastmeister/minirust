@@ -23,6 +23,8 @@
           buildInputs = with pkgs; [
             clang
             criterion
+            flex
+            bison
           ];
         };
       }

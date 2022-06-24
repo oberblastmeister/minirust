@@ -15,10 +15,14 @@ EXE := $(TARGET)/lox
 LIB := $(TARGET)/liblox.a
 TEST_EXE := $(TARGET)/lox_test
 CFLAGS := -Wextra -Wall -std=gnu17
-LIBS := -lm
+LIBS := -lm -lfl
+LEXER_OBJ := $(OBJ)/lexer.o
+OBJS += $(LEXER_OBJ)
+LEXER := src/lexer.c
+LEXER_FLEX := src/lexer.l
 
-.PHONY: all
-all: $(EXE) $(TEST_EXE) $(LIB)
+.PHONY: default
+default: $(EXE)
 
 .PHONY: run
 run: $(EXE)
@@ -40,6 +44,7 @@ $(LIB): $(OBJS) | $(TARGET)
 .PHONY: clean
 clean:
 	rm -rf $(TARGET)
+	rm $(LEXER)
 
 .PHONY: cleandep
 cleandep:
@@ -48,8 +53,15 @@ cleandep:
 $(TARGET) $(OBJ) $(TEST_OBJ) $(DEP) $(TEST_DEP):
 	mkdir -p $@
 
+$(LEXER_OBJ): $(LEXER)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 $(OBJ)/%.o: $(SRC)/%.c | $(TARGET) $(OBJ) $(DEP)
 	$(CC) $(CFLAGS) -MMD -MF $(DEP)/$*.d -c -o $@ $<
+	
+$(LEXER): $(LEXER_FLEX)
+	flex $<
+	mv ./lex.yy.c $@
 
 $(TEST_OBJ)/%.o: $(TEST_SRC)/%.c | $(TARGET) $(TEST_OBJ) $(TEST_DEP)
 	$(CC) $(CFLAGS) -MMD -MF $(TEST_DEP)/$*.d -c -o $@ $<

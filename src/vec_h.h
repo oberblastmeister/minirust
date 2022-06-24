@@ -26,7 +26,7 @@ V JOIN(V, new)(void);
 
 void JOIN(V, push)(V *vec, T x);
 
-inline T JOIN(V, last)(V *vec);
+T JOIN(V, last)(V *vec);
 
 T JOIN(V, pop)(V *vec);
 

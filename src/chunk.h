@@ -7,6 +7,11 @@
 
 typedef enum {
     OP_CONSTANT,
+    OP_ADD,
+    OP_SUBTRACT,
+    OP_MULTIPLY,
+    OP_DIVIDE,
+    OP_NEGATE,
     OP_CONSTANT_LONG,
     OP_RETURN,
 } op_code;
@@ -16,7 +21,7 @@ typedef struct {
     value_vec constants;
 } chunk;
 
-chunk chunk_new();
+chunk chunk_new(void);
 
 void chunk_free(chunk *chunk);
 

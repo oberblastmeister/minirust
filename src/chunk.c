@@ -1,6 +1,6 @@
 #include "chunk.h"
 
-chunk chunk_new() {
+chunk chunk_new(void) {
     return (chunk){.instructions = uint8_t_vec_new(),
                    .constants = value_vec_new()};
 }

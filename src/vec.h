@@ -56,7 +56,7 @@ is_static void JOIN(V, push)(V *vec, T x) {
 is_static inline T JOIN(V, last)(V *vec) { return vec->data[vec->len - 1]; }
 
 is_static T JOIN(V, pop)(V *vec) {
-    T x = JOIN(V, last)(vec);
+    T x = vec->data[vec->len - 1];
     vec->len--;
     return x;
 }
