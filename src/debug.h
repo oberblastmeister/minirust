@@ -1,5 +1,5 @@
-#ifndef DEBUG_H
-#define DEBUG_H
+#ifndef _LOX_DEBUG_H
+#define _LOX_DEBUG_H
 
 #include "chunk.h"
 

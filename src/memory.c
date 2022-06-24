@@ -11,3 +11,5 @@ void *reallocate(void *ptr, size_t size) {
     }
     return new_ptr;
 }
+
+inline void cleanup_free(void *p) { free(*(void **)p); }
