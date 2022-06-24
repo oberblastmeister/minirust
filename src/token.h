@@ -63,7 +63,8 @@ extern int yydebug;
     T_LEFT = 264,                  /* T_LEFT  */
     T_RIGHT = 265,                 /* T_RIGHT  */
     T_NEWLINE = 266,               /* T_NEWLINE  */
-    T_QUIT = 267                   /* T_QUIT  */
+    T_QUIT = 267,                  /* T_QUIT  */
+    T_ERROR = 268                  /* T_ERROR  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -72,12 +73,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 15 "./src/parser.y"
+#line 17 "./src/parser.y"
 
 	int ival;
 	float fval;
 
-#line 81 "./src/token.h"
+#line 82 "./src/token.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

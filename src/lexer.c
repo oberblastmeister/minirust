@@ -354,8 +354,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 13
-#define YY_END_OF_BUFFER 14
+#define YY_NUM_RULES 14
+#define YY_END_OF_BUFFER 15
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -365,7 +365,7 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[26] =
     {   0,
-        0,    0,   14,   13,    1,    4,    9,   10,    7,    5,
+        0,    0,   15,   13,    1,    4,    9,   10,    7,    5,
         6,    8,    3,   13,   13,    0,    3,    0,    0,    2,
         0,    0,   11,   12,    0
     } ;
@@ -775,61 +775,62 @@ YY_RULE_SETUP
 #line 33 "src/lexer.l"
 {
     lexer_column = 1;
+    lexer_line++;
     return T_NEWLINE;
 }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 37 "src/lexer.l"
+#line 38 "src/lexer.l"
 {
     return T_PLUS; 
 }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 40 "src/lexer.l"
+#line 41 "src/lexer.l"
 {
     return T_MINUS; 
 }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 43 "src/lexer.l"
+#line 44 "src/lexer.l"
 {
     return T_MULTIPLY; 
 }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 46 "src/lexer.l"
+#line 47 "src/lexer.l"
 {
     return T_DIVIDE; 
 }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 49 "src/lexer.l"
+#line 50 "src/lexer.l"
 {
     return T_LEFT; 
 }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 52 "src/lexer.l"
+#line 53 "src/lexer.l"
 {
     return T_RIGHT; 
 }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 55 "src/lexer.l"
+#line 56 "src/lexer.l"
 {
     return T_QUIT; 
 }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 58 "src/lexer.l"
+#line 59 "src/lexer.l"
 {
     return T_QUIT; 
 }
@@ -837,9 +838,16 @@ YY_RULE_SETUP
 case 13:
 YY_RULE_SETUP
 #line 62 "src/lexer.l"
+{
+    return T_ERROR;
+}
+	YY_BREAK
+case 14:
+YY_RULE_SETUP
+#line 66 "src/lexer.l"
 ECHO;
 	YY_BREAK
-#line 842 "lex.yy.c"
+#line 850 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1844,6 +1852,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 62 "src/lexer.l"
+#line 66 "src/lexer.l"
 
 

@@ -10,6 +10,8 @@ extern FILE* yyin;
 void yyerror(const char* s);
 %}
 
+%define parse.error detailed
+
 %locations
 
 %union {
@@ -23,6 +25,7 @@ void yyerror(const char* s);
 %token T_NEWLINE T_QUIT
 %left T_PLUS T_MINUS
 %left T_MULTIPLY T_DIVIDE
+%token T_ERROR
 
 %type<ival> expression
 %type<fval> mixed_expression
@@ -85,6 +88,5 @@ int run_calculator() {
 }
 
 void yyerror(const char* s) {
-	fprintf(stderr, "Parse error: %s\n", s);
-	exit(1);
+	fprintf(stderr, "%d:%d: Parse error: %s\n", yylloc.first_line, yylloc.first_column, s);
 }

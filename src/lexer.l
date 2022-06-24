@@ -32,6 +32,7 @@ DIGIT [0-9]
 }
 \n {
     lexer_column = 1;
+    lexer_line++;
     return T_NEWLINE;
 }
 "+" {
@@ -57,6 +58,9 @@ DIGIT [0-9]
 }
 "quit" {
     return T_QUIT; 
+}
+. {
+    return T_ERROR;
 }
 
 %%

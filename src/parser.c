@@ -120,11 +120,12 @@ enum yysymbol_kind_t
   YYSYMBOL_T_RIGHT = 10,                   /* T_RIGHT  */
   YYSYMBOL_T_NEWLINE = 11,                 /* T_NEWLINE  */
   YYSYMBOL_T_QUIT = 12,                    /* T_QUIT  */
-  YYSYMBOL_YYACCEPT = 13,                  /* $accept  */
-  YYSYMBOL_calculation = 14,               /* calculation  */
-  YYSYMBOL_line = 15,                      /* line  */
-  YYSYMBOL_mixed_expression = 16,          /* mixed_expression  */
-  YYSYMBOL_expression = 17                 /* expression  */
+  YYSYMBOL_T_ERROR = 13,                   /* T_ERROR  */
+  YYSYMBOL_YYACCEPT = 14,                  /* $accept  */
+  YYSYMBOL_calculation = 15,               /* calculation  */
+  YYSYMBOL_line = 16,                      /* line  */
+  YYSYMBOL_mixed_expression = 17,          /* mixed_expression  */
+  YYSYMBOL_expression = 18                 /* expression  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -322,7 +323,7 @@ typedef int yy_state_fast_t;
 
 #define YY_ASSERT(E) ((void) (0 && (E)))
 
-#if !defined yyoverflow
+#if 1
 
 /* The parser invokes alloca or malloc; define the necessary symbols.  */
 
@@ -387,7 +388,7 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 # endif
-#endif /* !defined yyoverflow */
+#endif /* 1 */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
@@ -458,7 +459,7 @@ union yyalloc
 #define YYLAST   62
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  13
+#define YYNTOKENS  14
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  5
 /* YYNRULES -- Number of rules.  */
@@ -467,7 +468,7 @@ union yyalloc
 #define YYNSTATES  42
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   267
+#define YYMAXUTOK   268
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -507,41 +508,38 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12
+       5,     6,     7,     8,     9,    10,    11,    12,    13
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    35,    35,    36,    40,    41,    42,    43,    47,    48,
-      49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
-      59,    60,    61,    65,    69,    70,    71,    72
+       0,    38,    38,    39,    43,    44,    45,    46,    50,    51,
+      52,    53,    54,    55,    56,    57,    58,    59,    60,    61,
+      62,    63,    64,    68,    72,    73,    74,    75
 };
 #endif
 
 /** Accessing symbol of state STATE.  */
 #define YY_ACCESSING_SYMBOL(State) YY_CAST (yysymbol_kind_t, yystos[State])
 
-#if YYDEBUG || 0
+#if 1
 /* The user-facing name of the symbol whose (internal) number is
    YYSYMBOL.  No bounds checking.  */
 static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
 
-/* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-   First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
-static const char *const yytname[] =
-{
-  "\"end of file\"", "error", "\"invalid token\"", "T_INT", "T_FLOAT",
-  "T_PLUS", "T_MINUS", "T_MULTIPLY", "T_DIVIDE", "T_LEFT", "T_RIGHT",
-  "T_NEWLINE", "T_QUIT", "$accept", "calculation", "line",
-  "mixed_expression", "expression", YY_NULLPTR
-};
-
 static const char *
 yysymbol_name (yysymbol_kind_t yysymbol)
 {
-  return yytname[yysymbol];
+  static const char *const yy_sname[] =
+  {
+  "end of file", "error", "invalid token", "T_INT", "T_FLOAT", "T_PLUS",
+  "T_MINUS", "T_MULTIPLY", "T_DIVIDE", "T_LEFT", "T_RIGHT", "T_NEWLINE",
+  "T_QUIT", "T_ERROR", "$accept", "calculation", "line",
+  "mixed_expression", "expression", YY_NULLPTR
+  };
+  return yy_sname[yysymbol];
 }
 #endif
 
@@ -619,19 +617,19 @@ static const yytype_int8 yycheck[] =
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,    14,     0,     3,     4,     9,    11,    12,    15,    16,
-      17,    16,    17,    11,     5,     6,     7,     8,    11,     5,
-       6,     7,     8,    11,    10,    10,    16,    17,    16,    17,
-      16,    17,    16,    17,    16,    17,    16,    17,    16,    17,
-      16,    17
+       0,    15,     0,     3,     4,     9,    11,    12,    16,    17,
+      18,    17,    18,    11,     5,     6,     7,     8,    11,     5,
+       6,     7,     8,    11,    10,    10,    17,    18,    17,    18,
+      17,    18,    17,    18,    17,    18,    17,    18,    17,    18,
+      17,    18
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    13,    14,    14,    15,    15,    15,    15,    16,    16,
-      16,    16,    16,    16,    16,    16,    16,    16,    16,    16,
-      16,    16,    16,    17,    17,    17,    17,    17
+       0,    14,    15,    15,    16,    16,    16,    16,    17,    17,
+      17,    17,    17,    17,    17,    17,    17,    17,    17,    17,
+      17,    17,    17,    18,    18,    18,    18,    18
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -909,8 +907,227 @@ int yydebug;
 #endif
 
 
+/* Context of a parse error.  */
+typedef struct
+{
+  yy_state_t *yyssp;
+  yysymbol_kind_t yytoken;
+  YYLTYPE *yylloc;
+} yypcontext_t;
+
+/* Put in YYARG at most YYARGN of the expected tokens given the
+   current YYCTX, and return the number of tokens stored in YYARG.  If
+   YYARG is null, return the number of expected tokens (guaranteed to
+   be less than YYNTOKENS).  Return YYENOMEM on memory exhaustion.
+   Return 0 if there are more than YYARGN expected tokens, yet fill
+   YYARG up to YYARGN. */
+static int
+yypcontext_expected_tokens (const yypcontext_t *yyctx,
+                            yysymbol_kind_t yyarg[], int yyargn)
+{
+  /* Actual size of YYARG. */
+  int yycount = 0;
+  int yyn = yypact[+*yyctx->yyssp];
+  if (!yypact_value_is_default (yyn))
+    {
+      /* Start YYX at -YYN if negative to avoid negative indexes in
+         YYCHECK.  In other words, skip the first -YYN actions for
+         this state because they are default actions.  */
+      int yyxbegin = yyn < 0 ? -yyn : 0;
+      /* Stay within bounds of both yycheck and yytname.  */
+      int yychecklim = YYLAST - yyn + 1;
+      int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+      int yyx;
+      for (yyx = yyxbegin; yyx < yyxend; ++yyx)
+        if (yycheck[yyx + yyn] == yyx && yyx != YYSYMBOL_YYerror
+            && !yytable_value_is_error (yytable[yyx + yyn]))
+          {
+            if (!yyarg)
+              ++yycount;
+            else if (yycount == yyargn)
+              return 0;
+            else
+              yyarg[yycount++] = YY_CAST (yysymbol_kind_t, yyx);
+          }
+    }
+  if (yyarg && yycount == 0 && 0 < yyargn)
+    yyarg[0] = YYSYMBOL_YYEMPTY;
+  return yycount;
+}
 
 
+
+
+#ifndef yystrlen
+# if defined __GLIBC__ && defined _STRING_H
+#  define yystrlen(S) (YY_CAST (YYPTRDIFF_T, strlen (S)))
+# else
+/* Return the length of YYSTR.  */
+static YYPTRDIFF_T
+yystrlen (const char *yystr)
+{
+  YYPTRDIFF_T yylen;
+  for (yylen = 0; yystr[yylen]; yylen++)
+    continue;
+  return yylen;
+}
+# endif
+#endif
+
+#ifndef yystpcpy
+# if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
+#  define yystpcpy stpcpy
+# else
+/* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
+   YYDEST.  */
+static char *
+yystpcpy (char *yydest, const char *yysrc)
+{
+  char *yyd = yydest;
+  const char *yys = yysrc;
+
+  while ((*yyd++ = *yys++) != '\0')
+    continue;
+
+  return yyd - 1;
+}
+# endif
+#endif
+
+
+
+static int
+yy_syntax_error_arguments (const yypcontext_t *yyctx,
+                           yysymbol_kind_t yyarg[], int yyargn)
+{
+  /* Actual size of YYARG. */
+  int yycount = 0;
+  /* There are many possibilities here to consider:
+     - If this state is a consistent state with a default action, then
+       the only way this function was invoked is if the default action
+       is an error action.  In that case, don't check for expected
+       tokens because there are none.
+     - The only way there can be no lookahead present (in yychar) is if
+       this state is a consistent state with a default action.  Thus,
+       detecting the absence of a lookahead is sufficient to determine
+       that there is no unexpected or expected token to report.  In that
+       case, just report a simple "syntax error".
+     - Don't assume there isn't a lookahead just because this state is a
+       consistent state with a default action.  There might have been a
+       previous inconsistent state, consistent state with a non-default
+       action, or user semantic action that manipulated yychar.
+     - Of course, the expected token list depends on states to have
+       correct lookahead information, and it depends on the parser not
+       to perform extra reductions after fetching a lookahead from the
+       scanner and before detecting a syntax error.  Thus, state merging
+       (from LALR or IELR) and default reductions corrupt the expected
+       token list.  However, the list is correct for canonical LR with
+       one exception: it will still contain any token that will not be
+       accepted due to an error action in a later state.
+  */
+  if (yyctx->yytoken != YYSYMBOL_YYEMPTY)
+    {
+      int yyn;
+      if (yyarg)
+        yyarg[yycount] = yyctx->yytoken;
+      ++yycount;
+      yyn = yypcontext_expected_tokens (yyctx,
+                                        yyarg ? yyarg + 1 : yyarg, yyargn - 1);
+      if (yyn == YYENOMEM)
+        return YYENOMEM;
+      else
+        yycount += yyn;
+    }
+  return yycount;
+}
+
+/* Copy into *YYMSG, which is of size *YYMSG_ALLOC, an error message
+   about the unexpected token YYTOKEN for the state stack whose top is
+   YYSSP.
+
+   Return 0 if *YYMSG was successfully written.  Return -1 if *YYMSG is
+   not large enough to hold the message.  In that case, also set
+   *YYMSG_ALLOC to the required number of bytes.  Return YYENOMEM if the
+   required number of bytes is too large to store.  */
+static int
+yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
+                const yypcontext_t *yyctx)
+{
+  enum { YYARGS_MAX = 5 };
+  /* Internationalized format string. */
+  const char *yyformat = YY_NULLPTR;
+  /* Arguments of yyformat: reported tokens (one for the "unexpected",
+     one per "expected"). */
+  yysymbol_kind_t yyarg[YYARGS_MAX];
+  /* Cumulated lengths of YYARG.  */
+  YYPTRDIFF_T yysize = 0;
+
+  /* Actual size of YYARG. */
+  int yycount = yy_syntax_error_arguments (yyctx, yyarg, YYARGS_MAX);
+  if (yycount == YYENOMEM)
+    return YYENOMEM;
+
+  switch (yycount)
+    {
+#define YYCASE_(N, S)                       \
+      case N:                               \
+        yyformat = S;                       \
+        break
+    default: /* Avoid compiler warnings. */
+      YYCASE_(0, YY_("syntax error"));
+      YYCASE_(1, YY_("syntax error, unexpected %s"));
+      YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
+      YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
+      YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
+      YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+#undef YYCASE_
+    }
+
+  /* Compute error message size.  Don't count the "%s"s, but reserve
+     room for the terminator.  */
+  yysize = yystrlen (yyformat) - 2 * yycount + 1;
+  {
+    int yyi;
+    for (yyi = 0; yyi < yycount; ++yyi)
+      {
+        YYPTRDIFF_T yysize1
+          = yysize + yystrlen (yysymbol_name (yyarg[yyi]));
+        if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
+          yysize = yysize1;
+        else
+          return YYENOMEM;
+      }
+  }
+
+  if (*yymsg_alloc < yysize)
+    {
+      *yymsg_alloc = 2 * yysize;
+      if (! (yysize <= *yymsg_alloc
+             && *yymsg_alloc <= YYSTACK_ALLOC_MAXIMUM))
+        *yymsg_alloc = YYSTACK_ALLOC_MAXIMUM;
+      return -1;
+    }
+
+  /* Avoid sprintf, as that infringes on the user's name space.
+     Don't have undefined behavior even if the translation
+     produced a string with the wrong number of "%s"s.  */
+  {
+    char *yyp = *yymsg;
+    int yyi = 0;
+    while ((*yyp = *yyformat) != '\0')
+      if (*yyp == '%' && yyformat[1] == 's' && yyi < yycount)
+        {
+          yyp = yystpcpy (yyp, yysymbol_name (yyarg[yyi++]));
+          yyformat += 2;
+        }
+      else
+        {
+          ++yyp;
+          ++yyformat;
+        }
+  }
+  return 0;
+}
 
 
 /*-----------------------------------------------.
@@ -995,7 +1212,10 @@ yyparse (void)
   /* The locations where the error started and ended.  */
   YYLTYPE yyerror_range[3];
 
-
+  /* Buffer for error messages, and its allocated size.  */
+  char yymsgbuf[128];
+  char *yymsg = yymsgbuf;
+  YYPTRDIFF_T yymsg_alloc = sizeof yymsgbuf;
 
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N), yylsp -= (N))
 
@@ -1216,147 +1436,147 @@ yyreduce:
   switch (yyn)
     {
   case 5: /* line: mixed_expression T_NEWLINE  */
-#line 41 "./src/parser.y"
+#line 44 "./src/parser.y"
                                  { printf("\tResult: %f\n", (yyvsp[-1].fval));}
-#line 1222 "./src/parser.c"
+#line 1442 "./src/parser.c"
     break;
 
   case 6: /* line: expression T_NEWLINE  */
-#line 42 "./src/parser.y"
+#line 45 "./src/parser.y"
                            { printf("\tResult: %i\n", (yyvsp[-1].ival)); }
-#line 1228 "./src/parser.c"
+#line 1448 "./src/parser.c"
     break;
 
   case 7: /* line: T_QUIT T_NEWLINE  */
-#line 43 "./src/parser.y"
+#line 46 "./src/parser.y"
                        { printf("bye!\n"); exit(0); }
-#line 1234 "./src/parser.c"
+#line 1454 "./src/parser.c"
     break;
 
   case 8: /* mixed_expression: T_FLOAT  */
-#line 47 "./src/parser.y"
+#line 50 "./src/parser.y"
                   { (yyval.fval) = (yyvsp[0].fval); }
-#line 1240 "./src/parser.c"
+#line 1460 "./src/parser.c"
     break;
 
   case 9: /* mixed_expression: mixed_expression T_PLUS mixed_expression  */
-#line 48 "./src/parser.y"
+#line 51 "./src/parser.y"
                                                          { (yyval.fval) = (yyvsp[-2].fval) + (yyvsp[0].fval); }
-#line 1246 "./src/parser.c"
+#line 1466 "./src/parser.c"
     break;
 
   case 10: /* mixed_expression: mixed_expression T_MINUS mixed_expression  */
-#line 49 "./src/parser.y"
+#line 52 "./src/parser.y"
                                                          { (yyval.fval) = (yyvsp[-2].fval) - (yyvsp[0].fval); }
-#line 1252 "./src/parser.c"
+#line 1472 "./src/parser.c"
     break;
 
   case 11: /* mixed_expression: mixed_expression T_MULTIPLY mixed_expression  */
-#line 50 "./src/parser.y"
+#line 53 "./src/parser.y"
                                                        { (yyval.fval) = (yyvsp[-2].fval) * (yyvsp[0].fval); }
-#line 1258 "./src/parser.c"
+#line 1478 "./src/parser.c"
     break;
 
   case 12: /* mixed_expression: mixed_expression T_DIVIDE mixed_expression  */
-#line 51 "./src/parser.y"
+#line 54 "./src/parser.y"
                                                          { (yyval.fval) = (yyvsp[-2].fval) / (yyvsp[0].fval); }
-#line 1264 "./src/parser.c"
+#line 1484 "./src/parser.c"
     break;
 
   case 13: /* mixed_expression: T_LEFT mixed_expression T_RIGHT  */
-#line 52 "./src/parser.y"
+#line 55 "./src/parser.y"
                                                          { (yyval.fval) = (yyvsp[-1].fval); }
-#line 1270 "./src/parser.c"
+#line 1490 "./src/parser.c"
     break;
 
   case 14: /* mixed_expression: expression T_PLUS mixed_expression  */
-#line 53 "./src/parser.y"
+#line 56 "./src/parser.y"
                                                          { (yyval.fval) = (yyvsp[-2].ival) + (yyvsp[0].fval); }
-#line 1276 "./src/parser.c"
+#line 1496 "./src/parser.c"
     break;
 
   case 15: /* mixed_expression: expression T_MINUS mixed_expression  */
-#line 54 "./src/parser.y"
+#line 57 "./src/parser.y"
                                                          { (yyval.fval) = (yyvsp[-2].ival) - (yyvsp[0].fval); }
-#line 1282 "./src/parser.c"
+#line 1502 "./src/parser.c"
     break;
 
   case 16: /* mixed_expression: expression T_MULTIPLY mixed_expression  */
-#line 55 "./src/parser.y"
+#line 58 "./src/parser.y"
                                                          { (yyval.fval) = (yyvsp[-2].ival) * (yyvsp[0].fval); }
-#line 1288 "./src/parser.c"
+#line 1508 "./src/parser.c"
     break;
 
   case 17: /* mixed_expression: expression T_DIVIDE mixed_expression  */
-#line 56 "./src/parser.y"
+#line 59 "./src/parser.y"
                                                  { (yyval.fval) = (yyvsp[-2].ival) / (yyvsp[0].fval); }
-#line 1294 "./src/parser.c"
+#line 1514 "./src/parser.c"
     break;
 
   case 18: /* mixed_expression: mixed_expression T_PLUS expression  */
-#line 57 "./src/parser.y"
+#line 60 "./src/parser.y"
                                                          { (yyval.fval) = (yyvsp[-2].fval) + (yyvsp[0].ival); }
-#line 1300 "./src/parser.c"
+#line 1520 "./src/parser.c"
     break;
 
   case 19: /* mixed_expression: mixed_expression T_MINUS expression  */
-#line 58 "./src/parser.y"
+#line 61 "./src/parser.y"
                                                          { (yyval.fval) = (yyvsp[-2].fval) - (yyvsp[0].ival); }
-#line 1306 "./src/parser.c"
+#line 1526 "./src/parser.c"
     break;
 
   case 20: /* mixed_expression: mixed_expression T_MULTIPLY expression  */
-#line 59 "./src/parser.y"
+#line 62 "./src/parser.y"
                                                          { (yyval.fval) = (yyvsp[-2].fval) * (yyvsp[0].ival); }
-#line 1312 "./src/parser.c"
+#line 1532 "./src/parser.c"
     break;
 
   case 21: /* mixed_expression: mixed_expression T_DIVIDE expression  */
-#line 60 "./src/parser.y"
+#line 63 "./src/parser.y"
                                                  { (yyval.fval) = (yyvsp[-2].fval) / (yyvsp[0].ival); }
-#line 1318 "./src/parser.c"
+#line 1538 "./src/parser.c"
     break;
 
   case 22: /* mixed_expression: expression T_DIVIDE expression  */
-#line 61 "./src/parser.y"
+#line 64 "./src/parser.y"
                                                          { (yyval.fval) = (yyvsp[-2].ival) / (float)(yyvsp[0].ival); }
-#line 1324 "./src/parser.c"
+#line 1544 "./src/parser.c"
     break;
 
   case 23: /* expression: T_INT  */
-#line 66 "./src/parser.y"
+#line 69 "./src/parser.y"
                 {
 			(yyval.ival) = (yyvsp[0].ival);
 		}
-#line 1332 "./src/parser.c"
+#line 1552 "./src/parser.c"
     break;
 
   case 24: /* expression: expression T_PLUS expression  */
-#line 69 "./src/parser.y"
+#line 72 "./src/parser.y"
                                         { (yyval.ival) = (yyvsp[-2].ival) + (yyvsp[0].ival); }
-#line 1338 "./src/parser.c"
+#line 1558 "./src/parser.c"
     break;
 
   case 25: /* expression: expression T_MINUS expression  */
-#line 70 "./src/parser.y"
+#line 73 "./src/parser.y"
                                         { (yyval.ival) = (yyvsp[-2].ival) - (yyvsp[0].ival); }
-#line 1344 "./src/parser.c"
+#line 1564 "./src/parser.c"
     break;
 
   case 26: /* expression: expression T_MULTIPLY expression  */
-#line 71 "./src/parser.y"
+#line 74 "./src/parser.y"
                                                 { (yyval.ival) = (yyvsp[-2].ival) * (yyvsp[0].ival); }
-#line 1350 "./src/parser.c"
+#line 1570 "./src/parser.c"
     break;
 
   case 27: /* expression: T_LEFT expression T_RIGHT  */
-#line 72 "./src/parser.y"
+#line 75 "./src/parser.y"
                                                 { (yyval.ival) = (yyvsp[-1].ival); }
-#line 1356 "./src/parser.c"
+#line 1576 "./src/parser.c"
     break;
 
 
-#line 1360 "./src/parser.c"
+#line 1580 "./src/parser.c"
 
       default: break;
     }
@@ -1404,7 +1624,37 @@ yyerrlab:
   if (!yyerrstatus)
     {
       ++yynerrs;
-      yyerror (YY_("syntax error"));
+      {
+        yypcontext_t yyctx
+          = {yyssp, yytoken, &yylloc};
+        char const *yymsgp = YY_("syntax error");
+        int yysyntax_error_status;
+        yysyntax_error_status = yysyntax_error (&yymsg_alloc, &yymsg, &yyctx);
+        if (yysyntax_error_status == 0)
+          yymsgp = yymsg;
+        else if (yysyntax_error_status == -1)
+          {
+            if (yymsg != yymsgbuf)
+              YYSTACK_FREE (yymsg);
+            yymsg = YY_CAST (char *,
+                             YYSTACK_ALLOC (YY_CAST (YYSIZE_T, yymsg_alloc)));
+            if (yymsg)
+              {
+                yysyntax_error_status
+                  = yysyntax_error (&yymsg_alloc, &yymsg, &yyctx);
+                yymsgp = yymsg;
+              }
+            else
+              {
+                yymsg = yymsgbuf;
+                yymsg_alloc = sizeof yymsgbuf;
+                yysyntax_error_status = YYENOMEM;
+              }
+          }
+        yyerror (yymsgp);
+        if (yysyntax_error_status == YYENOMEM)
+          YYNOMEM;
+      }
     }
 
   yyerror_range[1] = yylloc;
@@ -1550,11 +1800,12 @@ yyreturnlab:
   if (yyss != yyssa)
     YYSTACK_FREE (yyss);
 #endif
-
+  if (yymsg != yymsgbuf)
+    YYSTACK_FREE (yymsg);
   return yyresult;
 }
 
-#line 75 "./src/parser.y"
+#line 78 "./src/parser.y"
 
 
 int run_calculator() {
@@ -1568,6 +1819,5 @@ int run_calculator() {
 }
 
 void yyerror(const char* s) {
-	fprintf(stderr, "Parse error: %s\n", s);
-	exit(1);
+	fprintf(stderr, "%d:%d: Parse error: %s\n", yylloc.first_line, yylloc.first_column, s);
 }
