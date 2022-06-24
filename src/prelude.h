@@ -1,5 +1,5 @@
-#ifndef PRELUDE_H
-#define PRELUDE_H
+#ifndef _LOX_PRELUDE_H
+#define _LOX_PRELUDE_H
 
 #include <stdbool.h>
 #include <stddef.h>

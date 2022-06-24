@@ -7,8 +7,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "parser.h"
 
 int main(int argc, const char *argv[]) {
+    run_calculator();
+
     chunk chunk = chunk_new();
     int constant_i = chunk_add_constant(&chunk, 1.2);
     chunk_add_instruction(&chunk, OP_CONSTANT);

@@ -15,11 +15,16 @@ EXE := $(TARGET)/lox
 LIB := $(TARGET)/liblox.a
 TEST_EXE := $(TARGET)/lox_test
 CFLAGS := -Wextra -Wall -std=gnu17
-LIBS := -lm -lfl
+LIBS := -lm
 LEXER_OBJ := $(OBJ)/lexer.o
 OBJS += $(LEXER_OBJ)
-LEXER := src/lexer.c
-LEXER_FLEX := src/lexer.l
+LEXER := $(SRC)/lexer.c
+LEXER_FLEX := $(SRC)/lexer.l
+PARSER := $(SRC)/parser.c
+TOKEN_H := $(SRC)/token.h
+PARSER_BISON := $(SRC)/parser.y
+PARSER_OBJ = $(OBJ)/parser.o
+OBJS += $(PARSER_OBJ)
 
 .PHONY: default
 default: $(EXE)
@@ -42,22 +47,32 @@ $(LIB): $(OBJS) | $(TARGET)
 	ar -rcs $(LIB) $^
 
 .PHONY: clean
-clean:
+clean: cleanparser
 	rm -rf $(TARGET)
-	rm $(LEXER)
 
 .PHONY: cleandep
 cleandep:
 	rm -f $(dep)
 	
+cleanparser:
+	rm $(LEXER)
+	rm $(PARSER)
+	rm $(TOKEN_H)
+	
 $(TARGET) $(OBJ) $(TEST_OBJ) $(DEP) $(TEST_DEP):
 	mkdir -p $@
 
-$(LEXER_OBJ): $(LEXER)
+$(LEXER_OBJ): $(LEXER) $(PARSER)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(OBJ)/%.o: $(SRC)/%.c | $(TARGET) $(OBJ) $(DEP)
 	$(CC) $(CFLAGS) -MMD -MF $(DEP)/$*.d -c -o $@ $<
+	
+$(PARSER_OBJ): $(PARSER) $(TOKEN_H)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(PARSER) $(TOKEN_H): $(PARSER_BISON)
+	bison -o $(PARSER) --header=$(TOKEN_H) $(PARSER_BISON)
 	
 $(LEXER): $(LEXER_FLEX)
 	flex $<
