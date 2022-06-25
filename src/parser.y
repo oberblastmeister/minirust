@@ -1,18 +1,24 @@
 %define parse.error detailed
 %define api.pure full
 %locations
+// parameter for both the parser and lexer
 %param { yyscan_t scanner }
+// parser parameter
+%parse-param { parser_state *parser_state }
 
 %code top {
 #include <stdio.h>
 #include <stdlib.h>
+#include "lexer_state.h"
+#include "lexer_wrapper.h"
 } 
 %code requires {
+#include "parser_state.h"
 typedef void* yyscan_t;
 }
 %code {
 int yylex(YYSTYPE* yylvalp, YYLTYPE* yyllocp, yyscan_t scanner);
-void yyerror(YYLTYPE* yyllocp, yyscan_t unused, const char* msg);
+void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, const char* msg);
 }
 
 %union {
@@ -101,7 +107,16 @@ calculation
 
 %%
 
+void parse_file(FILE *in, lexer_state *lexer_state, parser_state *parser_state) {
+	yyscan_t scanner;          
+  	yylex_init_extra(lexer_state, &scanner);
+	yyset_in(in, scanner);
+	int res = yyparse(parser_state, scanner);
+	yylex_destroy(scanner);
+}
+	
 run_calculator() {
+
 	// yyin = stdin;
 
 	// do {
@@ -111,6 +126,6 @@ run_calculator() {
 	return 0;
 }
 
-void yyerror(YYLTYPE* yyllocp, yyscan_t unused, const char* s) {
+void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, const char *s) {
 	fprintf(stderr, "%d:%d: Parse error: %s\n", yyllocp->first_line, yyllocp->first_column, s);
 }

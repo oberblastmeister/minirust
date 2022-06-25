@@ -83,3 +83,10 @@ ALPHA [a-zA-Z]
 }
 
 %%
+
+yyscan_t new_scanner(FILE *in, lexer_state *lexer_state) {
+    yyscan_t scanner;
+    yylex_init_extra(lexer_state, &scanner);
+    yyset_in(in, scanner);
+    return scanner;
+}

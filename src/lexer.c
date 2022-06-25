@@ -1,5 +1,6 @@
+#line 1 "./src/lexer.c"
 
-#line 2 "lex.yy.c"
+#line 3 "./src/lexer.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -453,8 +454,8 @@ static const flex_int16_t yy_chk[36] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "src/lexer.l"
-#line 4 "src/lexer.l"
+#line 1 "./src/lexer.l"
+#line 4 "./src/lexer.l"
 #include <stdio.h>
 #include <stdlib.h>
 #include "token.h"
@@ -477,9 +478,9 @@ static const flex_int16_t yy_chk[36] =
     yylloc->first_column = yyextra->lexer_column; \
     yylloc->last_column = yyextra->lexer_column + yyleng - 1; \
     yyextra->lexer_column += yyleng;
-#line 480 "lex.yy.c"
+#line 481 "./src/lexer.c"
 
-#line 482 "lex.yy.c"
+#line 483 "./src/lexer.c"
 
 #define INITIAL 0
 #define STRING_SC 1
@@ -762,10 +763,10 @@ YY_DECL
 		}
 
 	{
-#line 37 "src/lexer.l"
+#line 37 "./src/lexer.l"
 
 
-#line 768 "lex.yy.c"
+#line 769 "./src/lexer.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -824,12 +825,12 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 39 "src/lexer.l"
+#line 39 "./src/lexer.l"
 ; // ignore all whitespace
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 40 "src/lexer.l"
+#line 40 "./src/lexer.l"
 {
     yylval->float_value = strtod(yytext, NULL);
     return TOKEN_FLOAT;
@@ -837,7 +838,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 44 "src/lexer.l"
+#line 44 "./src/lexer.l"
 {
     yylval->int_value = atoi(yytext);
     return TOKEN_INT;
@@ -846,7 +847,7 @@ YY_RULE_SETUP
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 48 "src/lexer.l"
+#line 48 "./src/lexer.l"
 {
     yyextra->lexer_column = 1;
     yyextra->lexer_line++;
@@ -854,49 +855,49 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 52 "src/lexer.l"
+#line 52 "./src/lexer.l"
 {
     return TOKEN_PLUS; 
 }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 55 "src/lexer.l"
+#line 55 "./src/lexer.l"
 {
     return TOKEN_MINUS; 
 }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 58 "src/lexer.l"
+#line 58 "./src/lexer.l"
 {
     return TOKEN_STAR; 
 }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 61 "src/lexer.l"
+#line 61 "./src/lexer.l"
 {
     return TOKEN_SLASH; 
 }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 64 "src/lexer.l"
+#line 64 "./src/lexer.l"
 {
     return TOKEN_LPAREN; 
 }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 67 "src/lexer.l"
+#line 67 "./src/lexer.l"
 {
     return TOKEN_RPAREN; 
 }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 70 "src/lexer.l"
+#line 70 "./src/lexer.l"
 {
     uint8_t_vec_clear(&yyextra->string_builder);
     BEGIN(STRING_SC);
@@ -904,14 +905,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 74 "src/lexer.l"
+#line 74 "./src/lexer.l"
 {
     BEGIN(0);
 }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 77 "src/lexer.l"
+#line 77 "./src/lexer.l"
 {
     // only supports ascii, so only one byte
     uint8_t_vec_push(&yyextra->string_builder, yytext[0]);
@@ -919,17 +920,17 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 81 "src/lexer.l"
+#line 81 "./src/lexer.l"
 {
     return TOKEN_ERROR;
 }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 85 "src/lexer.l"
+#line 85 "./src/lexer.l"
 ECHO;
 	YY_BREAK
-#line 932 "lex.yy.c"
+#line 933 "./src/lexer.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STRING_SC):
 	yyterminate();
@@ -2123,6 +2124,13 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 85 "src/lexer.l"
+#line 85 "./src/lexer.l"
 
+
+yyscan_t new_scanner(FILE *in, lexer_state *lexer_state) {
+    yyscan_t scanner;
+    yylex_init_extra(lexer_state, &scanner);
+    yyset_in(in, scanner);
+    return scanner;
+}
 

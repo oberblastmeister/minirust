@@ -19,12 +19,14 @@ LIBS := -lm
 LEXER_OBJ := $(OBJ)/lexer.o
 OBJS += $(LEXER_OBJ)
 LEXER := $(SRC)/lexer.c
+LEXER_H := $(SRC)/lexer.h
 LEXER_FLEX := $(SRC)/lexer.l
 PARSER := $(SRC)/parser.c
 TOKEN_H := $(SRC)/token.h
 PARSER_BISON := $(SRC)/parser.y
 PARSER_OBJ = $(OBJ)/parser.o
 OBJS += $(PARSER_OBJ)
+BISON_FLAGS := --color=always -Wcounterexamples
 
 .PHONY: default
 default: $(EXE)
@@ -56,6 +58,7 @@ cleandep:
 	
 cleanparser:
 	rm $(LEXER)
+	rm $(LEXER_H)
 	rm $(PARSER)
 	rm $(TOKEN_H)
 	
@@ -72,11 +75,10 @@ $(PARSER_OBJ): $(PARSER) $(TOKEN_H)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(PARSER) $(TOKEN_H): $(PARSER_BISON)
-	bison -o $(PARSER) --header=$(TOKEN_H) $(PARSER_BISON)
+	bison $(BISON_FLAGS) -o $(PARSER) --header=$(TOKEN_H) $(PARSER_BISON)
 	
-$(LEXER): $(LEXER_FLEX)
-	flex $<
-	mv ./lex.yy.c $@
+$(LEXER) $(LEXER_H): $(LEXER_FLEX)
+	flex --header-file=$(LEXER_H) -o $(LEXER) $(LEXER_FLEX)
 
 $(TEST_OBJ)/%.o: $(TEST_SRC)/%.c | $(TARGET) $(TEST_OBJ) $(TEST_DEP)
 	$(CC) $(CFLAGS) -MMD -MF $(TEST_DEP)/$*.d -c -o $@ $<
