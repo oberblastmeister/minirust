@@ -54,17 +54,44 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    T_INT = 258,                   /* T_INT  */
-    T_FLOAT = 259,                 /* T_FLOAT  */
-    T_PLUS = 260,                  /* T_PLUS  */
-    T_MINUS = 261,                 /* T_MINUS  */
-    T_MULTIPLY = 262,              /* T_MULTIPLY  */
-    T_DIVIDE = 263,                /* T_DIVIDE  */
-    T_LEFT = 264,                  /* T_LEFT  */
-    T_RIGHT = 265,                 /* T_RIGHT  */
-    T_NEWLINE = 266,               /* T_NEWLINE  */
-    T_QUIT = 267,                  /* T_QUIT  */
-    T_ERROR = 268                  /* T_ERROR  */
+    TOKEN_INT = 258,               /* TOKEN_INT  */
+    TOKEN_FLOAT = 259,             /* TOKEN_FLOAT  */
+    TOKEN_STRING = 260,            /* TOKEN_STRING  */
+    TOKEN_LBRACE = 261,            /* TOKEN_LBRACE  */
+    TOKEN_RBRACE = 262,            /* TOKEN_RBRACE  */
+    TOKEN_LPAREN = 263,            /* TOKEN_LPAREN  */
+    TOKEN_RPAREN = 264,            /* TOKEN_RPAREN  */
+    TOKEN_COMMA = 265,             /* TOKEN_COMMA  */
+    TOKEN_DOT = 266,               /* TOKEN_DOT  */
+    TOKEN_PLUS = 267,              /* TOKEN_PLUS  */
+    TOKEN_MINUS = 268,             /* TOKEN_MINUS  */
+    TOKEN_STAR = 269,              /* TOKEN_STAR  */
+    TOKEN_SLASH = 270,             /* TOKEN_SLASH  */
+    TOKEN_BANG = 271,              /* TOKEN_BANG  */
+    TOKEN_BANG_EQ = 272,           /* TOKEN_BANG_EQ  */
+    TOKEN_EQ = 273,                /* TOKEN_EQ  */
+    TOKEN_EQ_EQ = 274,             /* TOKEN_EQ_EQ  */
+    TOKEN_GT = 275,                /* TOKEN_GT  */
+    TOKEN_GT_EQ = 276,             /* TOKEN_GT_EQ  */
+    TOKEN_LT = 277,                /* TOKEN_LT  */
+    TOKEN_LT_EQ = 278,             /* TOKEN_LT_EQ  */
+    TOKEN_IDENT = 279,             /* TOKEN_IDENT  */
+    TOKEN_AND = 280,               /* TOKEN_AND  */
+    TOKEN_OR = 281,                /* TOKEN_OR  */
+    TOKEN_IF = 282,                /* TOKEN_IF  */
+    TOKEN_ELSE = 283,              /* TOKEN_ELSE  */
+    TOKEN_WHILE = 284,             /* TOKEN_WHILE  */
+    TOKEN_LET = 285,               /* TOKEN_LET  */
+    TOKEN_FALSE = 286,             /* TOKEN_FALSE  */
+    TOKEN_TRUE = 287,              /* TOKEN_TRUE  */
+    TOKEN_FUN = 288,               /* TOKEN_FUN  */
+    TOKEN_FOR = 289,               /* TOKEN_FOR  */
+    TOKEN_PRINT = 290,             /* TOKEN_PRINT  */
+    TOKEN_RETURN = 291,            /* TOKEN_RETURN  */
+    TOKEN_CLASS = 292,             /* TOKEN_CLASS  */
+    TOKEN_SUPER = 293,             /* TOKEN_SUPER  */
+    TOKEN_THIS = 294,              /* TOKEN_THIS  */
+    TOKEN_ERROR = 295              /* TOKEN_ERROR  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -75,10 +102,11 @@ union YYSTYPE
 {
 #line 17 "./src/parser.y"
 
-	int ival;
-	float fval;
+	int int_value;
+	double float_value;
+	char *string_value;
 
-#line 82 "./src/token.h"
+#line 110 "./src/token.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

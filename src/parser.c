@@ -110,22 +110,46 @@ enum yysymbol_kind_t
   YYSYMBOL_YYEOF = 0,                      /* "end of file"  */
   YYSYMBOL_YYerror = 1,                    /* error  */
   YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
-  YYSYMBOL_T_INT = 3,                      /* T_INT  */
-  YYSYMBOL_T_FLOAT = 4,                    /* T_FLOAT  */
-  YYSYMBOL_T_PLUS = 5,                     /* T_PLUS  */
-  YYSYMBOL_T_MINUS = 6,                    /* T_MINUS  */
-  YYSYMBOL_T_MULTIPLY = 7,                 /* T_MULTIPLY  */
-  YYSYMBOL_T_DIVIDE = 8,                   /* T_DIVIDE  */
-  YYSYMBOL_T_LEFT = 9,                     /* T_LEFT  */
-  YYSYMBOL_T_RIGHT = 10,                   /* T_RIGHT  */
-  YYSYMBOL_T_NEWLINE = 11,                 /* T_NEWLINE  */
-  YYSYMBOL_T_QUIT = 12,                    /* T_QUIT  */
-  YYSYMBOL_T_ERROR = 13,                   /* T_ERROR  */
-  YYSYMBOL_YYACCEPT = 14,                  /* $accept  */
-  YYSYMBOL_calculation = 15,               /* calculation  */
-  YYSYMBOL_line = 16,                      /* line  */
-  YYSYMBOL_mixed_expression = 17,          /* mixed_expression  */
-  YYSYMBOL_expression = 18                 /* expression  */
+  YYSYMBOL_TOKEN_INT = 3,                  /* TOKEN_INT  */
+  YYSYMBOL_TOKEN_FLOAT = 4,                /* TOKEN_FLOAT  */
+  YYSYMBOL_TOKEN_STRING = 5,               /* TOKEN_STRING  */
+  YYSYMBOL_TOKEN_LBRACE = 6,               /* TOKEN_LBRACE  */
+  YYSYMBOL_TOKEN_RBRACE = 7,               /* TOKEN_RBRACE  */
+  YYSYMBOL_TOKEN_LPAREN = 8,               /* TOKEN_LPAREN  */
+  YYSYMBOL_TOKEN_RPAREN = 9,               /* TOKEN_RPAREN  */
+  YYSYMBOL_TOKEN_COMMA = 10,               /* TOKEN_COMMA  */
+  YYSYMBOL_TOKEN_DOT = 11,                 /* TOKEN_DOT  */
+  YYSYMBOL_TOKEN_PLUS = 12,                /* TOKEN_PLUS  */
+  YYSYMBOL_TOKEN_MINUS = 13,               /* TOKEN_MINUS  */
+  YYSYMBOL_TOKEN_STAR = 14,                /* TOKEN_STAR  */
+  YYSYMBOL_TOKEN_SLASH = 15,               /* TOKEN_SLASH  */
+  YYSYMBOL_TOKEN_BANG = 16,                /* TOKEN_BANG  */
+  YYSYMBOL_TOKEN_BANG_EQ = 17,             /* TOKEN_BANG_EQ  */
+  YYSYMBOL_TOKEN_EQ = 18,                  /* TOKEN_EQ  */
+  YYSYMBOL_TOKEN_EQ_EQ = 19,               /* TOKEN_EQ_EQ  */
+  YYSYMBOL_TOKEN_GT = 20,                  /* TOKEN_GT  */
+  YYSYMBOL_TOKEN_GT_EQ = 21,               /* TOKEN_GT_EQ  */
+  YYSYMBOL_TOKEN_LT = 22,                  /* TOKEN_LT  */
+  YYSYMBOL_TOKEN_LT_EQ = 23,               /* TOKEN_LT_EQ  */
+  YYSYMBOL_TOKEN_IDENT = 24,               /* TOKEN_IDENT  */
+  YYSYMBOL_TOKEN_AND = 25,                 /* TOKEN_AND  */
+  YYSYMBOL_TOKEN_OR = 26,                  /* TOKEN_OR  */
+  YYSYMBOL_TOKEN_IF = 27,                  /* TOKEN_IF  */
+  YYSYMBOL_TOKEN_ELSE = 28,                /* TOKEN_ELSE  */
+  YYSYMBOL_TOKEN_WHILE = 29,               /* TOKEN_WHILE  */
+  YYSYMBOL_TOKEN_LET = 30,                 /* TOKEN_LET  */
+  YYSYMBOL_TOKEN_FALSE = 31,               /* TOKEN_FALSE  */
+  YYSYMBOL_TOKEN_TRUE = 32,                /* TOKEN_TRUE  */
+  YYSYMBOL_TOKEN_FUN = 33,                 /* TOKEN_FUN  */
+  YYSYMBOL_TOKEN_FOR = 34,                 /* TOKEN_FOR  */
+  YYSYMBOL_TOKEN_PRINT = 35,               /* TOKEN_PRINT  */
+  YYSYMBOL_TOKEN_RETURN = 36,              /* TOKEN_RETURN  */
+  YYSYMBOL_TOKEN_CLASS = 37,               /* TOKEN_CLASS  */
+  YYSYMBOL_TOKEN_SUPER = 38,               /* TOKEN_SUPER  */
+  YYSYMBOL_TOKEN_THIS = 39,                /* TOKEN_THIS  */
+  YYSYMBOL_TOKEN_ERROR = 40,               /* TOKEN_ERROR  */
+  YYSYMBOL_YYACCEPT = 41,                  /* $accept  */
+  YYSYMBOL_calculation = 42                /* calculation  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -456,19 +480,19 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   62
+#define YYLAST   0
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  14
+#define YYNTOKENS  41
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  5
+#define YYNNTS  2
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  27
+#define YYNRULES  2
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  42
+#define YYNSTATES  3
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   268
+#define YYMAXUTOK   295
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -508,16 +532,17 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13
+       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
+      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
+      35,    36,    37,    38,    39,    40
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    38,    38,    39,    43,    44,    45,    46,    50,    51,
-      52,    53,    54,    55,    56,    57,    58,    59,    60,    61,
-      62,    63,    64,    68,    72,    73,    74,    75
+       0,    61,    61
 };
 #endif
 
@@ -534,16 +559,21 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 {
   static const char *const yy_sname[] =
   {
-  "end of file", "error", "invalid token", "T_INT", "T_FLOAT", "T_PLUS",
-  "T_MINUS", "T_MULTIPLY", "T_DIVIDE", "T_LEFT", "T_RIGHT", "T_NEWLINE",
-  "T_QUIT", "T_ERROR", "$accept", "calculation", "line",
-  "mixed_expression", "expression", YY_NULLPTR
+  "end of file", "error", "invalid token", "TOKEN_INT", "TOKEN_FLOAT",
+  "TOKEN_STRING", "TOKEN_LBRACE", "TOKEN_RBRACE", "TOKEN_LPAREN",
+  "TOKEN_RPAREN", "TOKEN_COMMA", "TOKEN_DOT", "TOKEN_PLUS", "TOKEN_MINUS",
+  "TOKEN_STAR", "TOKEN_SLASH", "TOKEN_BANG", "TOKEN_BANG_EQ", "TOKEN_EQ",
+  "TOKEN_EQ_EQ", "TOKEN_GT", "TOKEN_GT_EQ", "TOKEN_LT", "TOKEN_LT_EQ",
+  "TOKEN_IDENT", "TOKEN_AND", "TOKEN_OR", "TOKEN_IF", "TOKEN_ELSE",
+  "TOKEN_WHILE", "TOKEN_LET", "TOKEN_FALSE", "TOKEN_TRUE", "TOKEN_FUN",
+  "TOKEN_FOR", "TOKEN_PRINT", "TOKEN_RETURN", "TOKEN_CLASS", "TOKEN_SUPER",
+  "TOKEN_THIS", "TOKEN_ERROR", "$accept", "calculation", YY_NULLPTR
   };
   return yy_sname[yysymbol];
 }
 #endif
 
-#define YYPACT_NINF (-6)
+#define YYPACT_NINF (-1)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -557,11 +587,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -6,    31,    -6,    -6,    -6,    17,    -6,    -3,    -6,    -4,
-      39,    46,    52,    -6,    17,    17,    17,    17,    -6,    17,
-      17,    17,    17,    -6,    -6,    -6,    -2,    11,    -2,    11,
-      -6,    -6,    -6,    -6,    -2,    11,    -2,    11,    -6,    -6,
-      -6,    -6
+      -1,     0,    -1
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -569,23 +595,19 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       2,     0,     1,    23,     8,     0,     4,     0,     3,     0,
-       0,     0,     0,     7,     0,     0,     0,     0,     5,     0,
-       0,     0,     0,     6,    13,    27,     9,    18,    10,    19,
-      11,    20,    12,    21,    14,    24,    15,    25,    16,    26,
-      17,    22
+       2,     0,     1
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -6,    -6,    -6,    -5,     8
+      -1,    -1
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     1,     8,     9,    10
+       0,     1
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -593,51 +615,31 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      11,    14,    15,    16,    17,    16,    17,    18,    13,    26,
-      28,    30,    32,    12,    34,    36,    38,    40,    21,    22,
-       3,     4,    27,    29,    31,    33,     5,    35,    37,    39,
-      41,     2,     0,     0,     3,     4,     0,     0,     0,     0,
-       5,     0,     6,     7,    19,    20,    21,    22,     0,     0,
-      23,    14,    15,    16,    17,     0,    24,    19,    20,    21,
-      22,     0,    25
+       2
 };
 
 static const yytype_int8 yycheck[] =
 {
-       5,     5,     6,     7,     8,     7,     8,    11,    11,    14,
-      15,    16,    17,     5,    19,    20,    21,    22,     7,     8,
-       3,     4,    14,    15,    16,    17,     9,    19,    20,    21,
-      22,     0,    -1,    -1,     3,     4,    -1,    -1,    -1,    -1,
-       9,    -1,    11,    12,     5,     6,     7,     8,    -1,    -1,
-      11,     5,     6,     7,     8,    -1,    10,     5,     6,     7,
-       8,    -1,    10
+       0
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,    15,     0,     3,     4,     9,    11,    12,    16,    17,
-      18,    17,    18,    11,     5,     6,     7,     8,    11,     5,
-       6,     7,     8,    11,    10,    10,    17,    18,    17,    18,
-      17,    18,    17,    18,    17,    18,    17,    18,    17,    18,
-      17,    18
+       0,    42,     0
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    14,    15,    15,    16,    16,    16,    16,    17,    17,
-      17,    17,    17,    17,    17,    17,    17,    17,    17,    17,
-      17,    17,    17,    18,    18,    18,    18,    18
+       0,    41,    42
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     0,     2,     1,     2,     2,     2,     1,     3,
-       3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
-       3,     3,     3,     1,     3,     3,     3,     3
+       0,     2,     0
 };
 
 
@@ -1435,148 +1437,8 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 5: /* line: mixed_expression T_NEWLINE  */
-#line 44 "./src/parser.y"
-                                 { printf("\tResult: %f\n", (yyvsp[-1].fval));}
+
 #line 1442 "./src/parser.c"
-    break;
-
-  case 6: /* line: expression T_NEWLINE  */
-#line 45 "./src/parser.y"
-                           { printf("\tResult: %i\n", (yyvsp[-1].ival)); }
-#line 1448 "./src/parser.c"
-    break;
-
-  case 7: /* line: T_QUIT T_NEWLINE  */
-#line 46 "./src/parser.y"
-                       { printf("bye!\n"); exit(0); }
-#line 1454 "./src/parser.c"
-    break;
-
-  case 8: /* mixed_expression: T_FLOAT  */
-#line 50 "./src/parser.y"
-                  { (yyval.fval) = (yyvsp[0].fval); }
-#line 1460 "./src/parser.c"
-    break;
-
-  case 9: /* mixed_expression: mixed_expression T_PLUS mixed_expression  */
-#line 51 "./src/parser.y"
-                                                         { (yyval.fval) = (yyvsp[-2].fval) + (yyvsp[0].fval); }
-#line 1466 "./src/parser.c"
-    break;
-
-  case 10: /* mixed_expression: mixed_expression T_MINUS mixed_expression  */
-#line 52 "./src/parser.y"
-                                                         { (yyval.fval) = (yyvsp[-2].fval) - (yyvsp[0].fval); }
-#line 1472 "./src/parser.c"
-    break;
-
-  case 11: /* mixed_expression: mixed_expression T_MULTIPLY mixed_expression  */
-#line 53 "./src/parser.y"
-                                                       { (yyval.fval) = (yyvsp[-2].fval) * (yyvsp[0].fval); }
-#line 1478 "./src/parser.c"
-    break;
-
-  case 12: /* mixed_expression: mixed_expression T_DIVIDE mixed_expression  */
-#line 54 "./src/parser.y"
-                                                         { (yyval.fval) = (yyvsp[-2].fval) / (yyvsp[0].fval); }
-#line 1484 "./src/parser.c"
-    break;
-
-  case 13: /* mixed_expression: T_LEFT mixed_expression T_RIGHT  */
-#line 55 "./src/parser.y"
-                                                         { (yyval.fval) = (yyvsp[-1].fval); }
-#line 1490 "./src/parser.c"
-    break;
-
-  case 14: /* mixed_expression: expression T_PLUS mixed_expression  */
-#line 56 "./src/parser.y"
-                                                         { (yyval.fval) = (yyvsp[-2].ival) + (yyvsp[0].fval); }
-#line 1496 "./src/parser.c"
-    break;
-
-  case 15: /* mixed_expression: expression T_MINUS mixed_expression  */
-#line 57 "./src/parser.y"
-                                                         { (yyval.fval) = (yyvsp[-2].ival) - (yyvsp[0].fval); }
-#line 1502 "./src/parser.c"
-    break;
-
-  case 16: /* mixed_expression: expression T_MULTIPLY mixed_expression  */
-#line 58 "./src/parser.y"
-                                                         { (yyval.fval) = (yyvsp[-2].ival) * (yyvsp[0].fval); }
-#line 1508 "./src/parser.c"
-    break;
-
-  case 17: /* mixed_expression: expression T_DIVIDE mixed_expression  */
-#line 59 "./src/parser.y"
-                                                 { (yyval.fval) = (yyvsp[-2].ival) / (yyvsp[0].fval); }
-#line 1514 "./src/parser.c"
-    break;
-
-  case 18: /* mixed_expression: mixed_expression T_PLUS expression  */
-#line 60 "./src/parser.y"
-                                                         { (yyval.fval) = (yyvsp[-2].fval) + (yyvsp[0].ival); }
-#line 1520 "./src/parser.c"
-    break;
-
-  case 19: /* mixed_expression: mixed_expression T_MINUS expression  */
-#line 61 "./src/parser.y"
-                                                         { (yyval.fval) = (yyvsp[-2].fval) - (yyvsp[0].ival); }
-#line 1526 "./src/parser.c"
-    break;
-
-  case 20: /* mixed_expression: mixed_expression T_MULTIPLY expression  */
-#line 62 "./src/parser.y"
-                                                         { (yyval.fval) = (yyvsp[-2].fval) * (yyvsp[0].ival); }
-#line 1532 "./src/parser.c"
-    break;
-
-  case 21: /* mixed_expression: mixed_expression T_DIVIDE expression  */
-#line 63 "./src/parser.y"
-                                                 { (yyval.fval) = (yyvsp[-2].fval) / (yyvsp[0].ival); }
-#line 1538 "./src/parser.c"
-    break;
-
-  case 22: /* mixed_expression: expression T_DIVIDE expression  */
-#line 64 "./src/parser.y"
-                                                         { (yyval.fval) = (yyvsp[-2].ival) / (float)(yyvsp[0].ival); }
-#line 1544 "./src/parser.c"
-    break;
-
-  case 23: /* expression: T_INT  */
-#line 69 "./src/parser.y"
-                {
-			(yyval.ival) = (yyvsp[0].ival);
-		}
-#line 1552 "./src/parser.c"
-    break;
-
-  case 24: /* expression: expression T_PLUS expression  */
-#line 72 "./src/parser.y"
-                                        { (yyval.ival) = (yyvsp[-2].ival) + (yyvsp[0].ival); }
-#line 1558 "./src/parser.c"
-    break;
-
-  case 25: /* expression: expression T_MINUS expression  */
-#line 73 "./src/parser.y"
-                                        { (yyval.ival) = (yyvsp[-2].ival) - (yyvsp[0].ival); }
-#line 1564 "./src/parser.c"
-    break;
-
-  case 26: /* expression: expression T_MULTIPLY expression  */
-#line 74 "./src/parser.y"
-                                                { (yyval.ival) = (yyvsp[-2].ival) * (yyvsp[0].ival); }
-#line 1570 "./src/parser.c"
-    break;
-
-  case 27: /* expression: T_LEFT expression T_RIGHT  */
-#line 75 "./src/parser.y"
-                                                { (yyval.ival) = (yyvsp[-1].ival); }
-#line 1576 "./src/parser.c"
-    break;
-
-
-#line 1580 "./src/parser.c"
 
       default: break;
     }
@@ -1805,10 +1667,10 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 78 "./src/parser.y"
+#line 101 "./src/parser.y"
 
 
-int run_calculator() {
+run_calculator() {
 	yyin = stdin;
 
 	do {

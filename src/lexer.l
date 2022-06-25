@@ -2,13 +2,18 @@
 
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include "token.h"
+#include "uint8_t_vec.h"
+#include "vec_util.h"
 
 #define YY_DECL enum yytokentype yylex()
 
 static int lexer_column = 1;
 
 static int lexer_line = 1;
+
+static uint8_t_vec string_builder = const_vec_new();
 
 #define YY_USER_ACTION \
     yylloc.first_line = yylloc.last_line = lexer_line; \
@@ -17,50 +22,59 @@ static int lexer_line = 1;
     lexer_column += yyleng;
 %}
 
+// exclusive start condition
+// when BEGIN, only rules with STRING_SC will be considered
+%x STRING_SC
+
 DIGIT [0-9]
+ALPHA [a-zA-Z]
 
 %%
 
 [ \t\r] ; // ignore all whitespace
 {DIGIT}+"."{DIGIT}+ {
-    yylval.fval = atof(yytext);
-    return T_FLOAT;
+    yylval.float_value = strtod(yytext, NULL);
+    return TOKEN_FLOAT;
 }
 {DIGIT}+ {
-    yylval.ival = atoi(yytext);
-    return T_INT;
+    yylval.int_value = atoi(yytext);
+    return TOKEN_INT;
 }
 \n {
     lexer_column = 1;
     lexer_line++;
-    return T_NEWLINE;
 }
 "+" {
-    return T_PLUS; 
+    return TOKEN_PLUS; 
 }
 "-" {
-    return T_MINUS; 
+    return TOKEN_MINUS; 
 }
 "*" {
-    return T_MULTIPLY; 
+    return TOKEN_STAR; 
 }
 "/" {
-    return T_DIVIDE; 
+    return TOKEN_SLASH; 
 }
 "(" {
-    return T_LEFT; 
+    return TOKEN_LPAREN; 
 }
 ")" {
-    return T_RIGHT; 
+    return TOKEN_RPAREN; 
 }
-"exit" {
-    return T_QUIT; 
+\" {
+    uint8_t_vec_clear(&string_builder);
+    BEGIN(STRING_SC);
 }
-"quit" {
-    return T_QUIT; 
+<STRING_SC>\" {
+    BEGIN(0);
+}
+<STRING_SC>. {
+    // only supports ascii, so only one byte
+    uint8_t_vec_push(&string_builder, yytext[0]);
 }
 . {
-    return T_ERROR;
+    return TOKEN_ERROR;
 }
 
 %%

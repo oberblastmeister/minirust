@@ -22,19 +22,23 @@ typedef struct {
 
 void JOIN(V, init)(V *vec);
 
-V JOIN(V, new)(void);
+__attribute__((const)) V JOIN(V, new)(void);
 
 void JOIN(V, push)(V *vec, T x);
 
-T JOIN(V, last)(V *vec);
+T JOIN(V, last)(const V *vec);
 
 T JOIN(V, pop)(V *vec);
 
-T JOIN(V, index)(V *vec, int i);
+T JOIN(V, index)(const V *vec, int i);
 
 void JOIN(V, free)(V *vec);
 
-size_t JOIN(V, len)(V *vec);
+size_t JOIN(V, len)(const V *vec);
+
+V JOIN(V, copy)(const V *vec);
+
+void JOIN(V, clear)(V *vec);
 
 #undef V
 
