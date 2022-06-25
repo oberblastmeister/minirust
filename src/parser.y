@@ -1,18 +1,19 @@
-%{
+%define parse.error detailed
+%define api.pure full
+%locations
+%param { yyscan_t scanner }
 
+%code top {
 #include <stdio.h>
 #include <stdlib.h>
-
-extern int yylex();
-extern int yyparse();
-extern FILE* yyin;
-void yyerror(const char* s);
-
-%}
-
-%define parse.error detailed
-
-%locations
+} 
+%code requires {
+typedef void* yyscan_t;
+}
+%code {
+int yylex(YYSTYPE* yylvalp, YYLTYPE* yyllocp, yyscan_t scanner);
+void yyerror(YYLTYPE* yyllocp, yyscan_t unused, const char* msg);
+}
 
 %union {
 	int int_value;
@@ -101,15 +102,15 @@ calculation
 %%
 
 run_calculator() {
-	yyin = stdin;
+	// yyin = stdin;
 
-	do {
-		yyparse();
-	} while(!feof(yyin));
+	// do {
+	// 	yyparse();
+	// } while(!feof(yyin));
 
 	return 0;
 }
 
-void yyerror(const char* s) {
-	fprintf(stderr, "%d:%d: Parse error: %s\n", yylloc.first_line, yylloc.first_column, s);
+void yyerror(YYLTYPE* yyllocp, yyscan_t unused, const char* s) {
+	fprintf(stderr, "%d:%d: Parse error: %s\n", yyllocp->first_line, yyllocp->first_column, s);
 }

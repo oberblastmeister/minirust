@@ -44,6 +44,12 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 10 "./src/parser.y"
+
+typedef void* yyscan_t;
+
+#line 53 "./src/token.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -100,13 +106,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 17 "./src/parser.y"
+#line 18 "./src/parser.y"
 
 	int int_value;
 	double float_value;
 	char *string_value;
 
-#line 110 "./src/token.h"
+#line 116 "./src/token.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -129,10 +135,9 @@ struct YYLTYPE
 #endif
 
 
-extern YYSTYPE yylval;
-extern YYLTYPE yylloc;
 
-int yyparse (void);
+
+int yyparse (yyscan_t scanner);
 
 
 #endif /* !YY_YY_SRC_TOKEN_H_INCLUDED  */
