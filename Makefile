@@ -1,32 +1,46 @@
-CC := gcc
-TARGET := ./target
-DEP := $(TARGET)/dep
-TEST_DEP := $(TARGET)/test_dep
-SRC := ./src
-TEST_SRC := ./test
-OBJ := $(TARGET)/obj
+# compilation
+CC = gcc
+CFLAGS = -Wextra -Wall -std=gnu17 -I $(GEN_INCLUDE) -I $(SRC)
+LIBS = -lm
+
+# directories
+TARGET = ./target
+DEP = $(TARGET)/dep
+TEST_DEP = $(TARGET)/test_dep
+SRC = ./src
+TEST_SRC = ./test
+OBJ = $(TARGET)/obj
 TEST_OBJ = $(TARGET)/test_obj
+GEN = $(TARGET)/gen
+GEN_SRC = $(GEN)/src
+GEN_INCLUDE = $(GEN)/include
+
+# files
+EXE = $(TARGET)/lox
+LIB = $(TARGET)/liblox.a
+TEST_EXE = $(TARGET)/lox_test
+
+# flex and bison
+LEXER_OBJ = $(OBJ)/lexer.o
+LEXER = $(GEN_SRC)/lexer.c
+LEXER_H = $(GEN_INCLUDE)/lexer.h
+LEXER_FLEX = $(SRC)/lexer.l
+PARSER = $(GEN_SRC)/parser.c
+TOKEN_H = $(GEN_INCLUDE)/token.h
+PARSER_BISON = $(SRC)/parser.y
+PARSER_OBJ = $(OBJ)/parser.o
+BISON_FLAGS = --color=always -Wcounterexamples
+
+# multiple files
 SRCS := $(wildcard $(SRC)/*.c)
-TEST_SRCS := $(wildcard $(TEST_SRC)/*.c)
 OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
+# add -I $(SRC) for the generated files
+OBJS += $(LEXER_OBJ)
+OBJS += $(PARSER_OBJ)
+TEST_SRCS := $(wildcard $(TEST_SRC)/*.c)
 TEST_OBJS := $(patsubst $(TEST_SRC)/%.c, $(TEST_OBJ)/%.o, $(TEST_SRCS))
 DEPS := $(patsubst $(SRC)/%.c, $(DEP)/%.d, $(SRCS))
-EXE := $(TARGET)/lox
-LIB := $(TARGET)/liblox.a
-TEST_EXE := $(TARGET)/lox_test
-CFLAGS := -Wextra -Wall -std=gnu17
-LIBS := -lm
-LEXER_OBJ := $(OBJ)/lexer.o
-OBJS += $(LEXER_OBJ)
-LEXER := $(SRC)/lexer.c
-LEXER_H := $(SRC)/lexer.h
-LEXER_FLEX := $(SRC)/lexer.l
-PARSER := $(SRC)/parser.c
-TOKEN_H := $(SRC)/token.h
-PARSER_BISON := $(SRC)/parser.y
-PARSER_OBJ = $(OBJ)/parser.o
-OBJS += $(PARSER_OBJ)
-BISON_FLAGS := --color=always -Wcounterexamples
+
 
 .PHONY: default
 default: $(EXE)
@@ -39,17 +53,8 @@ run: $(EXE)
 test: $(TEST_EXE)
 	$(TEST_EXE)
 
-$(EXE): $(OBJS) | $(TARGET)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS)
-	
-$(TEST_EXE): $(TEST_OBJS) $(LIB) | $(TARGET)
-	$(CC) $(filter %main.o, $^) -o $@ $(CFLAGS) $(LIBS) -lcriterion -Ltarget -llox
-	
-$(LIB): $(OBJS) | $(TARGET)
-	ar -rcs $(LIB) $^
-
 .PHONY: clean
-clean: cleanparser
+clean:
 	rm -rf $(TARGET)
 
 .PHONY: cleandep
@@ -61,27 +66,42 @@ cleanparser:
 	rm $(LEXER_H)
 	rm $(PARSER)
 	rm $(TOKEN_H)
+
+# executable
+$(EXE): $(OBJS) | $(TARGET)
+	$(CC) $^ -o $@ $(CFLAGS) $(LIBS)
 	
-$(TARGET) $(OBJ) $(TEST_OBJ) $(DEP) $(TEST_DEP):
-	mkdir -p $@
-
-$(LEXER_OBJ): $(LEXER) $(PARSER)
-	$(CC) $(CFLAGS) -c -o $@ $<
-
+# test executable
+$(TEST_EXE): $(TEST_OBJS) $(LIB) | $(TARGET)
+	$(CC) $(filter %main.o, $^) -o $@ $(CFLAGS) $(LIBS) -lcriterion -Ltarget -llox
+	
+# static library
+$(LIB): $(OBJS) | $(TARGET)
+	ar -rcs $(LIB) $^
+	
+# create object files
 $(OBJ)/%.o: $(SRC)/%.c | $(TARGET) $(OBJ) $(DEP)
 	$(CC) $(CFLAGS) -MMD -MF $(DEP)/$*.d -c -o $@ $<
 	
+# bison
 $(PARSER_OBJ): $(PARSER) $(TOKEN_H)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(PARSER) $(TOKEN_H): $(PARSER_BISON)
+$(PARSER) $(TOKEN_H): $(PARSER_BISON) | $(GEN_SRC) $(GEN_INCLUDE)
 	bison $(BISON_FLAGS) -o $(PARSER) --header=$(TOKEN_H) $(PARSER_BISON)
 	
-$(LEXER) $(LEXER_H): $(LEXER_FLEX)
+# flex
+$(LEXER_OBJ): $(LEXER) $(PARSER)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(LEXER) $(LEXER_H): $(LEXER_FLEX) | $(GEN_SRC) $(GEN_INCLUDE)
 	flex --header-file=$(LEXER_H) -o $(LEXER) $(LEXER_FLEX)
 
 $(TEST_OBJ)/%.o: $(TEST_SRC)/%.c | $(TARGET) $(TEST_OBJ) $(TEST_DEP)
 	$(CC) $(CFLAGS) -MMD -MF $(TEST_DEP)/$*.d -c -o $@ $<
 		
+$(TARGET) $(OBJ) $(TEST_OBJ) $(DEP) $(TEST_DEP) $(GEN) $(GEN_INCLUDE) $(GEN_SRC):
+	@mkdir -p $@
+
 # dash means don't error if the dep files can't be found
 -include $(DEPS)
