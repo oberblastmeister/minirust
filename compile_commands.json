@@ -6,40 +6,10 @@
    "-Wextra",
    "-Wall",
    "-std=gnu17",
-   "-MMD",
-   "-MF",
-   "./target/dep/another.d",
-   "-c",
-   "-o",
-   "target/obj/another.o",
-   "src/another.c"
-  ],
-  "file": "src/another.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-MMD",
-   "-MF",
-   "./target/dep/final.d",
-   "-c",
-   "-o",
-   "target/obj/final.o",
-   "src/final.c"
-  ],
-  "file": "src/final.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
    "-MMD",
    "-MF",
    "./target/dep/main.d",
@@ -49,5 +19,272 @@
    "src/main.c"
   ],
   "file": "src/main.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/ast.d",
+   "-c",
+   "-o",
+   "target/obj/ast.o",
+   "src/ast.c"
+  ],
+  "file": "src/ast.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/chunk.d",
+   "-c",
+   "-o",
+   "target/obj/chunk.o",
+   "src/chunk.c"
+  ],
+  "file": "src/chunk.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/debug.d",
+   "-c",
+   "-o",
+   "target/obj/debug.o",
+   "src/debug.c"
+  ],
+  "file": "src/debug.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/int_vec.d",
+   "-c",
+   "-o",
+   "target/obj/int_vec.o",
+   "src/int_vec.c"
+  ],
+  "file": "src/int_vec.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/io_extra.d",
+   "-c",
+   "-o",
+   "target/obj/io_extra.o",
+   "src/io_extra.c"
+  ],
+  "file": "src/io_extra.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/lexer_state.d",
+   "-c",
+   "-o",
+   "target/obj/lexer_state.o",
+   "src/lexer_state.c"
+  ],
+  "file": "src/lexer_state.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/memory.d",
+   "-c",
+   "-o",
+   "target/obj/memory.o",
+   "src/memory.c"
+  ],
+  "file": "src/memory.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/parser_state.d",
+   "-c",
+   "-o",
+   "target/obj/parser_state.o",
+   "src/parser_state.c"
+  ],
+  "file": "src/parser_state.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/uint8_t_vec.d",
+   "-c",
+   "-o",
+   "target/obj/uint8_t_vec.o",
+   "src/uint8_t_vec.c"
+  ],
+  "file": "src/uint8_t_vec.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/value.d",
+   "-c",
+   "-o",
+   "target/obj/value.o",
+   "src/value.c"
+  ],
+  "file": "src/value.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/vm.d",
+   "-c",
+   "-o",
+   "target/obj/vm.o",
+   "src/vm.c"
+  ],
+  "file": "src/vm.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-c",
+   "-o",
+   "target/obj/lexer.o",
+   "target/gen/src/lexer.c"
+  ],
+  "file": "target/gen/src/lexer.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-c",
+   "-o",
+   "target/obj/parser.o",
+   "target/gen/src/parser.c"
+  ],
+  "file": "target/gen/src/parser.c"
  }
 ]
