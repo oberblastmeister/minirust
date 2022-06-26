@@ -12,4 +12,6 @@
 
 #include "lexer.h"
 
+void run_lexer_debug(void);
+
 #endif

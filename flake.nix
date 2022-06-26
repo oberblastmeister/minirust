@@ -19,6 +19,8 @@
         devShell = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
             clang-tools
+            clang-analyzer
+            cppcheck
           ];
           buildInputs = with pkgs; [
             clang

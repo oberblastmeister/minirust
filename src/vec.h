@@ -1,89 +1,108 @@
-#ifndef T
-#error "Template type T undefined for <vec.h>"
+#ifndef VEC_TYPE
+#error "VEC_TYPE undefined"
 // do this just to get better support for clangd
 // the file will already fail to compile
-#define T int
+#define VEC_TYPE int
 #endif
 
+#include "bits.h"
 #include "macro_util.h"
 #include "prelude.h"
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef S
+#ifdef VEC_STATIC
 #define is_static static
 #else
 #define is_static
 #endif
 
-#define V JOIN(T, vec)
+#define VEC JOIN(VEC_TYPE, vec)
 
 #ifndef VEC_DEFINED
 typedef struct {
     size_t len;
     size_t cap;
-    T *data;
-} V;
+    VEC_TYPE *data;
+} VEC;
 #else
 #undef VEC_DEFINED
 #endif
 
-static void JOIN(V, maybe_resize_)(V *vec) {
+static void JOIN(VEC, maybe_resize_)(VEC *vec) {
     if (vec->cap == vec->len) {
         int old_cap = vec->cap;
         vec->cap = old_cap < 8 ? 8 : old_cap * 2;
-        vec->data = realloc(vec->data, sizeof(T) * vec->cap);
+        vec->data = realloc(vec->data, sizeof(VEC_TYPE) * vec->cap);
     }
 }
 
-is_static void JOIN(V, init)(V *vec) {
+is_static VEC JOIN(VEC, from_ptr_copied)(VEC_TYPE *p, size_t len) {
+    size_t cap = (size_t)next_power_of_2((uint64_t)len);
+    VEC_TYPE *data = malloc(sizeof(VEC_TYPE) * cap);
+    memcpy(data, p, sizeof(VEC_TYPE) * len);
+    return (VEC){
+        .len = len,
+        .cap = cap,
+        .data = data,
+    };
+}
+
+is_static void JOIN(VEC, init)(VEC *vec) {
     vec->len = 0;
     vec->cap = 0;
     vec->data = NULL;
 }
 
-is_static V JOIN(V, new)(void) { return (V){.len = 0, .cap = 0, .data = NULL}; }
+is_static VEC JOIN(VEC, new)(void) {
+    return (VEC){.len = 0, .cap = 0, .data = NULL};
+}
 
-is_static void JOIN(V, push)(V *vec, T x) {
-    JOIN(V, maybe_resize_)(vec);
+is_static void JOIN(VEC, push)(VEC *vec, VEC_TYPE x) {
+    JOIN(VEC, maybe_resize_)(vec);
     vec->data[vec->len] = x;
     vec->len++;
 }
 
-is_static inline T JOIN(V, last)(const V *vec) {
+is_static inline VEC_TYPE JOIN(VEC, last)(const VEC *vec) {
     return vec->data[vec->len - 1];
 }
 
-is_static T JOIN(V, pop)(V *vec) {
-    T x = vec->data[vec->len - 1];
+is_static VEC_TYPE JOIN(VEC, pop)(VEC *vec) {
+    VEC_TYPE x = vec->data[vec->len - 1];
     vec->len--;
     return x;
 }
 
-is_static T JOIN(V, index)(const V *vec, int i) { return vec->data[i]; }
-
-is_static void JOIN(V, free)(V *vec) {
-    free(vec->data);
-    JOIN(V, init)(vec);
+is_static VEC_TYPE JOIN(VEC, index)(const VEC *vec, int i) {
+    return vec->data[i];
 }
 
-is_static size_t JOIN(V, len)(const V *vec) { return vec->len; }
-
-is_static V JOIN(V, copy)(const V *vec) {
-    T *data = malloc(sizeof(T) * vec->cap);
-    memcpy(data, vec->data, sizeof(T) * vec->len);
-    return (V){.len = vec->len, .cap = vec->cap, .data = data};
+is_static void JOIN(VEC, free)(VEC *vec) {
+    if (vec->data != NULL) {
+        free(vec->data);
+        JOIN(VEC, init)(vec);
+    }
 }
 
-is_static void JOIN(V, clear)(V *vec) { vec->len = 0; }
+is_static size_t JOIN(VEC, len)(const VEC *vec) { return vec->len; }
+
+is_static VEC JOIN(VEC, copy)(const VEC *vec) {
+    VEC_TYPE *data = malloc(sizeof(VEC_TYPE) * vec->cap);
+    memcpy(data, vec->data, sizeof(VEC_TYPE) * vec->len);
+    return (VEC){.len = vec->len, .cap = vec->cap, .data = data};
+}
+
+is_static void JOIN(VEC, clear)(VEC *vec) { vec->len = 0; }
+
+is_static VEC_TYPE *JOIN(VEC, ptr_at)(VEC *vec, int i) { return &vec->data[i]; }
+
+is_static VEC_TYPE *JOIN(VEC, alloc)(VEC *vec, VEC_TYPE t) {
+    JOIN(VEC, push)(vec, t);
+    return &vec->data[vec->len - 1];
+}
 
 #undef is_static
-#undef V
-
-// Hold preserves `T` if other containers wish to extend `vec.h`.
-#ifdef HOLD
-#undef HOLD
-#else
-#undef T
-#undef S
-#endif
+#undef VEC
+#undef VEC_STATIC
+#undef VEC_TYPE

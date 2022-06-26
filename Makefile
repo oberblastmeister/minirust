@@ -61,11 +61,16 @@ clean:
 cleandep:
 	rm -f $(dep)
 	
+.PHONY: cleanparser
 cleanparser:
 	rm $(LEXER)
 	rm $(LEXER_H)
 	rm $(PARSER)
 	rm $(TOKEN_H)
+	
+.PHONY: check
+check:
+	cppcheck $(SRC)
 
 # executable
 $(EXE): $(OBJS) | $(TARGET)

@@ -1,4 +1,4 @@
 #include "int_vec.h"
 
-#define T int
+#define VEC_TYPE int
 #include "vec.h"

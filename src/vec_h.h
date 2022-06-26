@@ -1,51 +1,45 @@
-
-#ifndef T
-#error "Template type T undefined for <vec.h>"
+#ifndef VEC_TYPE
+#error "VEC_TYPE undefined"
 // do this just to get better ide support
 // the file will already fail to compile
-#define T int
+#define VEC_TYPE int
 #endif
 
 #include "macro_util.h"
 #include "prelude.h"
 #include <stdlib.h>
 
-#define V JOIN(T, vec)
+#define VEC JOIN(VEC_TYPE, vec)
 
 typedef struct {
     size_t len;
     size_t cap;
-    T *data;
-} V;
+    VEC_TYPE *data;
+} VEC;
 
 #define VEC_DEFINED
 
-void JOIN(V, init)(V *vec);
+void JOIN(VEC, init)(VEC *vec);
 
-__attribute__((const)) V JOIN(V, new)(void);
+VEC JOIN(VEC, new)(void);
 
-void JOIN(V, push)(V *vec, T x);
+VEC JOIN(VEC, from_ptr_copied)(VEC_TYPE *p, size_t len);
 
-T JOIN(V, last)(const V *vec);
+void JOIN(VEC, push)(VEC *vec, VEC_TYPE x);
 
-T JOIN(V, pop)(V *vec);
+VEC_TYPE JOIN(VEC, last)(const VEC *vec);
 
-T JOIN(V, index)(const V *vec, int i);
+VEC_TYPE JOIN(VEC, pop)(VEC *vec);
 
-void JOIN(V, free)(V *vec);
+VEC_TYPE JOIN(VEC, index)(const VEC *vec, int i);
 
-size_t JOIN(V, len)(const V *vec);
+void JOIN(VEC, free)(VEC *vec);
 
-V JOIN(V, copy)(const V *vec);
+size_t JOIN(VEC, len)(const VEC *vec);
 
-void JOIN(V, clear)(V *vec);
+VEC JOIN(VEC, copy)(const VEC *vec);
 
-#undef V
+void JOIN(VEC, clear)(VEC *vec);
 
-// Hold preserves `T` if other containers wish to extend `vec.h`.
-#ifdef HOLD
-#undef HOLD
-#else
-#undef T
-#undef S
-#endif
+#undef VEC
+#undef VEC_TYPE

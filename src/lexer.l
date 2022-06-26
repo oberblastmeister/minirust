@@ -4,39 +4,90 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "token.h"
+#include "string_vec.h"
 #include "uint8_t_vec.h"
 #include "vec_util.h"
 #include "lexer_state.h"
+#include "parser_state.h"
 
-// #define YY_DECL enum yytokentype yylex()
-
-// #define YY_DECL enum yytokentype yylex(YYSTYPE *yylval, YYLTYPE *yylloc, lexer_state *state)
-
-// static int lexer_column = 1;
-
-// static int lexer_line = 1;
-
-// static uint8_t_vec string_builder = const_vec_new();
+#define PUSH_BYTE(b) uint8_t_vec_push(&yyextra->lexer_state.string_builder, b)
 
 #define YY_USER_ACTION \
-    yylloc->first_line = yylloc->last_line = yyextra->lexer_line; \
-    yylloc->first_column = yyextra->lexer_column; \
-    yylloc->last_column = yyextra->lexer_column + yyleng - 1; \
-    yyextra->lexer_column += yyleng;
+    yylloc->first_line = yylloc->last_line = yyextra->lexer_state.lexer_line; \
+    yylloc->first_column = yyextra->lexer_state.lexer_column; \
+    yylloc->last_column = yyextra->lexer_state.lexer_column + yyleng - 1; \
+    yyextra->lexer_state.lexer_column += yyleng;
 %}
 
 %option reentrant
 %option bison-bridge bison-locations
-%option extra-type="lexer_state *"
+%option extra-type="parser_state *"
 
 %x STRING_SC
 
 DIGIT [0-9]
 ALPHA [a-zA-Z]
+IDENT_START {ALPHA}|"_"
 
 %%
 
-[ \t\r] ; // ignore all whitespace
+[ \t\r] { } // ignore all whitespace
+\n {
+    yyextra->lexer_state.lexer_column = 1;
+    yyextra->lexer_state.lexer_line++;
+}
+"{" { return TOKEN_LBRACE; }
+"}" { return TOKEN_RBRACE; }
+"(" { return TOKEN_LPAREN; }
+")" { return TOKEN_RPAREN; }
+"," { return TOKEN_COMMA; }
+"." { return TOKEN_DOT; }
+"+" { return TOKEN_PLUS; }
+"-" { return TOKEN_MINUS; }
+"*" { return TOKEN_STAR; }
+"/" { return TOKEN_SLASH; }
+"!" { return TOKEN_BANG; }
+"!=" { return TOKEN_BANG_EQ; }
+"=" { return TOKEN_EQ; }
+"==" { return TOKEN_EQ_EQ; }
+">" { return TOKEN_GT; }
+">=" { return TOKEN_GT_EQ; }
+"<" { return TOKEN_LT; }
+"<=" { return TOKEN_LT_EQ; }
+\" {
+    uint8_t_vec_clear(&yyextra->lexer_state.string_builder);
+    BEGIN(STRING_SC);
+}
+<STRING_SC>\" {
+    yylval->string_vec_value = uint8_t_vec_copy(&yyextra->lexer_state.string_builder);
+    BEGIN(0);
+    return TOKEN_STRING;
+}
+<STRING_SC>. {
+    // only supports ascii, so only one byte
+    PUSH_BYTE(yytext[0]);
+}
+<STRING_SC>\\t { PUSH_BYTE((uint8_t)'\t'); }
+<STRING_SC>\\r { PUSH_BYTE((uint8_t)'\r'); }
+<STRING_SC>\\\\ { PUSH_BYTE((uint8_t)'\\'); }
+<STRING_SC>\\n { PUSH_BYTE((uint8_t)'\n'); }
+<STRING_SC>\\\" { PUSH_BYTE((uint8_t)'\"'); }
+and { return TOKEN_AND; }
+or { return TOKEN_OR; }
+if { return TOKEN_IF; }
+else { return TOKEN_ELSE; }
+while { return TOKEN_WHILE; }
+let { return TOKEN_LET; }
+mut { return TOKEN_MUT; }
+false { return TOKEN_FALSE; }
+true { return TOKEN_TRUE; }
+fun { return TOKEN_FUN; }
+for { return TOKEN_FOR; }
+print { return TOKEN_PRINT; }
+return { return TOKEN_RETURN; }
+class { return TOKEN_CLASS; }
+super { return TOKEN_SUPER; }
+this { return TOKEN_THIS; }
 {DIGIT}+"."{DIGIT}+ {
     yylval->float_value = strtod(yytext, NULL);
     return TOKEN_FLOAT;
@@ -45,48 +96,30 @@ ALPHA [a-zA-Z]
     yylval->int_value = atoi(yytext);
     return TOKEN_INT;
 }
-\n {
-    yyextra->lexer_column = 1;
-    yyextra->lexer_line++;
-}
-"+" {
-    return TOKEN_PLUS; 
-}
-"-" {
-    return TOKEN_MINUS; 
-}
-"*" {
-    return TOKEN_STAR; 
-}
-"/" {
-    return TOKEN_SLASH; 
-}
-"(" {
-    return TOKEN_LPAREN; 
-}
-")" {
-    return TOKEN_RPAREN; 
-}
-\" {
-    uint8_t_vec_clear(&yyextra->string_builder);
-    BEGIN(STRING_SC);
-}
-<STRING_SC>\" {
-    BEGIN(0);
-}
-<STRING_SC>. {
-    // only supports ascii, so only one byte
-    uint8_t_vec_push(&yyextra->string_builder, yytext[0]);
+{IDENT_START}({IDENT_START}|{DIGIT})* { 
+    printf("yyleng: %d\n", yyleng);
+    // yyleng does not include the null
+    yylval->string_vec_value = string_vec_new_n(yytext, yyleng + 1);
+    return TOKEN_IDENT;
 }
 . {
+    // yyextra->lexer_state.last_error = "Unknown token";
     return TOKEN_ERROR;
 }
 
 %%
 
-yyscan_t new_scanner(FILE *in, lexer_state *lexer_state) {
-    yyscan_t scanner;
-    yylex_init_extra(lexer_state, &scanner);
-    yyset_in(in, scanner);
-    return scanner;
+void run_lexer_debug(void) {
+	yyscan_t scanner;
+    YYSTYPE lval;
+    YYLTYPE lloc;
+    parser_state parser_state = parser_state_new();
+  	yylex_init_extra(&parser_state, &scanner);
+	yyset_in(stdin, scanner);
+    yyset_out(stdout, scanner);
+    do {
+        int token = yylex(&lval, &lloc, scanner);
+        printf("token: %d\n", token);
+    } while (true);
+	yylex_destroy(scanner);
 }

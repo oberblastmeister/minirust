@@ -1,3 +1,5 @@
+// based on https://stackoverflow.com/questions/48850242/thread-safe-reentrant-bison-flex
+
 %define parse.error detailed
 %define api.pure full
 %locations
@@ -14,6 +16,8 @@
 } 
 %code requires {
 #include "parser_state.h"
+#include "string_vec.h"
+#include "uint8_t_vec.h"
 typedef void* yyscan_t;
 }
 %code {
@@ -24,13 +28,13 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %union {
 	int int_value;
 	double float_value;
-	char *string_value;
+	string_vec string_vec_value;
 }
 
 // values
 %token<int_value> TOKEN_INT
 %token<float_value> TOKEN_FLOAT
-%token<string_value> TOKEN_STRING
+%token<string_vec_value> TOKEN_STRING
 // delimiters
 %token TOKEN_LBRACE TOKEN_RBRACE
 %token TOKEN_LPAREN TOKEN_RPAREN
@@ -46,12 +50,15 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %token TOKEN_IDENT
 // keywords
 %token TOKEN_AND TOKEN_OR
-%token TOKEN_IF TOKEN_ELSE TOKEN_WHILE TOKEN_LET
+%token TOKEN_IF TOKEN_ELSE TOKEN_WHILE TOKEN_LET TOKEN_MUT
 %token TOKEN_FALSE TOKEN_TRUE
 %token TOKEN_FUN TOKEN_FOR TOKEN_PRINT TOKEN_RETURN 
 %token TOKEN_CLASS TOKEN_SUPER TOKEN_THIS
 // lexer errors
-%token TOKEN_ERROR
+%token<string_vec_value> TOKEN_ERROR
+
+// used during error recovery
+%destructor { uint8_t_vec_free(&$$); } <string_vec_value>
 
 // precedence
 %left TOKEN_PLUS TOKEN_MINUS
@@ -107,9 +114,9 @@ calculation
 
 %%
 
-void parse_file(FILE *in, lexer_state *lexer_state, parser_state *parser_state) {
+void parse_file(FILE *in, parser_state *parser_state) {
 	yyscan_t scanner;          
-  	yylex_init_extra(lexer_state, &scanner);
+  	yylex_init_extra(parser_state, &scanner);
 	yyset_in(in, scanner);
 	int res = yyparse(parser_state, scanner);
 	yylex_destroy(scanner);
@@ -127,5 +134,10 @@ run_calculator() {
 }
 
 void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, const char *s) {
-	fprintf(stderr, "%d:%d: Parse error: %s\n", yyllocp->first_line, yyllocp->first_column, s);
+	fprintf(stderr, "%d:%d: Parse error: %s", yyllocp->first_line, yyllocp->first_column, s);
+	/* char *last_error = scanner->yyextra_r.last_error;
+	if (last_error[0] != '\0') {
+		fprintf(stderr, ": %s\n", last_error);
+	} */
+	parser_state->errors_amount++;
 }

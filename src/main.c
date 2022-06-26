@@ -8,8 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "parser.h"
+#include "lexer_wrapper.h"
 
 int main(int argc, const char *argv[]) {
+    run_lexer_debug();
     run_calculator();
 
     chunk chunk = chunk_new();
@@ -33,3 +35,7 @@ int main(int argc, const char *argv[]) {
     vm_run(&vm);
     return 0;
 }
+
+// void test(int n, char s[n]) {
+    
+// }

@@ -3,7 +3,7 @@
 
 typedef double value;
 
-#define T value
+#define VEC_TYPE value
 #include "vec_h.h"
     
 void value_print(value value);
