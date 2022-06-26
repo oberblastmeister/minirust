@@ -1,5 +1,6 @@
 # compilation
 CC = gcc
+# add -I $(SRC) for the generated files
 CFLAGS = -Wextra -Wall -std=gnu17 -I $(GEN_INCLUDE) -I $(SRC)
 LIBS = -lm
 
@@ -34,9 +35,10 @@ BISON_FLAGS = --color=always -Wcounterexamples
 # multiple files
 SRCS := $(wildcard $(SRC)/*.c)
 OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
-# add -I $(SRC) for the generated files
 OBJS += $(LEXER_OBJ)
 OBJS += $(PARSER_OBJ)
+HEADERS += $(TOKEN_H)
+HEADERS += $(LEXER_H)
 TEST_SRCS := $(wildcard $(TEST_SRC)/*.c)
 TEST_OBJS := $(patsubst $(TEST_SRC)/%.c, $(TEST_OBJ)/%.o, $(TEST_SRCS))
 DEPS := $(patsubst $(SRC)/%.c, $(DEP)/%.d, $(SRCS))
@@ -85,11 +87,11 @@ $(LIB): $(OBJS) | $(TARGET)
 	ar -rcs $(LIB) $^
 	
 # create object files
-$(OBJ)/%.o: $(SRC)/%.c | $(TARGET) $(OBJ) $(DEP)
+$(OBJ)/%.o: $(SRC)/%.c $(HEADERS) | $(TARGET) $(OBJ) $(DEP)
 	$(CC) $(CFLAGS) -MMD -MF $(DEP)/$*.d -c -o $@ $<
 	
 # bison
-$(PARSER_OBJ): $(PARSER) $(TOKEN_H)
+$(PARSER_OBJ): $(PARSER) $(HEADERS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(PARSER) $(TOKEN_H): $(PARSER_BISON) | $(GEN_SRC) $(GEN_INCLUDE)

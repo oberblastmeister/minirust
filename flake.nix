@@ -23,7 +23,7 @@
             cppcheck
           ];
           buildInputs = with pkgs; [
-            clang
+            gcc
             criterion
             flex
             bison
