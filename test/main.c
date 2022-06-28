@@ -18,13 +18,13 @@ DLLEXPORT int main(int argc, char *argv[]) {
     struct criterion_test_set *tests = criterion_initialize();
 
     int result = 0;
-    if (criterion_handle_args(argc, argv, true))
+    if (criterion_handle_args(argc, argv, true)) {
         result = !criterion_run_all_tests(tests);
+    }
 
     criterion_finalize(tests);
     return result;
 }
 
-Test(misc, failing) { cr_assert(0); }
-
-Test(misc, passing) { cr_assert(1); }
+// the tests must be under the main function
+#include "bits.c"

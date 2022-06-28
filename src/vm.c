@@ -28,23 +28,23 @@ interpret_result vm_run(vm *vm) {
             break;
         }
         case OP_ADD: {
-            BINARY_OP(vm, +);
+            // BINARY_OP(vm, +);
             break;
         }
         case OP_SUBTRACT: {
-            BINARY_OP(vm, -);
+            // BINARY_OP(vm, -);
             break;
         }
         case OP_MULTIPLY: {
-            BINARY_OP(vm, *);
+            // BINARY_OP(vm, *);
             break;
         }
         case OP_DIVIDE: {
-            BINARY_OP(vm, /);
+            // BINARY_OP(vm, /);
             break;
         }
         case OP_NEGATE: {
-            vm_push(vm, -vm_pop(vm));
+            // vm_push(vm, -vm_pop(vm));
             break;
         }
         case OP_RETURN: {

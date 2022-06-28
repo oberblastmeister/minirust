@@ -11,14 +11,18 @@
 %code top {
 #include <stdio.h>
 #include <stdlib.h>
-#include "lexer_state.h"
 #include "lexer_wrapper.h"
+#include "parser_util.h"
 } 
 %code requires {
-#include "parser_state.h"
 #include "string_vec.h"
+#include "ast.h"
 #include "uint8_t_vec.h"
+#include "lexer_state.h"
+#include "parser_state.h"
+
 typedef void* yyscan_t;
+
 }
 %code {
 int yylex(YYSTYPE* yylvalp, YYLTYPE* yyllocp, yyscan_t scanner);
@@ -29,6 +33,11 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 	int int_value;
 	double float_value;
 	string_vec string_vec_value;
+	expr expr;
+	stmt stmt;
+	decl decl;
+	string_vec_vec string_vec_vec;
+	expr_block expr_block;
 }
 
 // values
@@ -39,7 +48,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %token TOKEN_LBRACE TOKEN_RBRACE
 %token TOKEN_LPAREN TOKEN_RPAREN
 // puncutation
-%token TOKEN_COMMA TOKEN_DOT
+%token TOKEN_COMMA TOKEN_DOT TOKEN_SEMI
 // operators
 %token TOKEN_PLUS TOKEN_MINUS TOKEN_STAR TOKEN_SLASH 
 %token TOKEN_BANG 
@@ -47,12 +56,12 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %token TOKEN_GT TOKEN_GT_EQ 
 %token TOKEN_LT TOKEN_LT_EQ
 // identifiers
-%token TOKEN_IDENT
+%token<string_vec_value> TOKEN_IDENT
 // keywords
 %token TOKEN_AND TOKEN_OR
 %token TOKEN_IF TOKEN_ELSE TOKEN_WHILE TOKEN_LET TOKEN_MUT
 %token TOKEN_FALSE TOKEN_TRUE
-%token TOKEN_FUN TOKEN_FOR TOKEN_PRINT TOKEN_RETURN 
+%token TOKEN_FUN TOKEN_FOR TOKEN_PRINT TOKEN_RETURN TOKEN_LOOP
 %token TOKEN_CLASS TOKEN_SUPER TOKEN_THIS
 // lexer errors
 %token<string_vec_value> TOKEN_ERROR
@@ -61,56 +70,117 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %destructor { uint8_t_vec_free(&$$); } <string_vec_value>
 
 // precedence
+%left TOKEN_RETURN
+%nonassoc TOKEN_EQ_EQ TOKEN_BANG_EQ
+%nonassoc TOKEN_GT TOKEN_GT_EQ
+%nonassoc TOKEN_LT TOKEN_LT_EQ
+%left TOKEN_OR
+%left TOKEN_AND
 %left TOKEN_PLUS TOKEN_MINUS
 %left TOKEN_STAR TOKEN_SLASH
+%left TOKEN_BANG
 
-%type<int_value> expression
-%type<float_value> mixed_expression
+/* %type<int_value> expression
+%type<float_value> mixed_expression */
+%type<decl> decl
+%type<stmt> stmt
+%type<expr> expr expr_op expr_atom 
+%type<expr_block> expr_block expr_block_internal
+%type<string_vec_vec> idents;
 
-%start calculation
+%start decl stmt expr expr_atom expr_block
 
 %%
 
-calculation
-	: /* EMPTY */
-	// | calculation line
+decl
+	: stmt { $$ = (decl){ DECL_STMT, { .decl_stmt = $1 } }; }
+;
+	 
+stmt
+	: expr TOKEN_SEMI { $$ = (stmt){ STMT_EXPR, { .stmt_expr = ALLOC_EXPR($1) } }; }
+	| TOKEN_LET TOKEN_IDENT TOKEN_EQ expr TOKEN_SEMI
+		{
+			$$ = (stmt) {
+				STMT_LET,
+				{
+					.stmt_let = {
+						.name = $2,
+						.expr = ALLOC_EXPR($4),
+					}
+				}
+			};
+		}
 ;
 
-// line
-// :TOKEN_NEWLINE
-//     | mixed_expression TOKEN_NEWLINE { printf("\tResult: %f\n", $1);}
-//     | expression TOKEN_NEWLINE { printf("\tResult: %i\n", $1); }
-//     | TOKEN_QUIT TOKEN_NEWLINE { printf("bye!\n"); exit(0); }
-// ;
+expr
+	: expr_op { $$ = $1; }
+;
 
-// mixed_expression
-// 	: TOKEN_FLOAT { $$ = $1; }
-// 	| mixed_expression TOKEN_PLUS mixed_expression	 { $$ = $1 + $3; }
-// 	| mixed_expression TOKEN_MINUS mixed_expression	 { $$ = $1 - $3; }
-// 	| mixed_expression TOKEN_STAR mixed_expression { $$ = $1 * $3; }
-// 	| mixed_expression TOKEN_SLASH mixed_expression	 { $$ = $1 / $3; }
-// 	| TOKEN_LEFT mixed_expression TOKEN_RIGHT		 { $$ = $2; }
-// 	| expression TOKEN_PLUS mixed_expression	 	 { $$ = $1 + $3; }
-// 	| expression TOKEN_MINUS mixed_expression	 	 { $$ = $1 - $3; }
-// 	| expression TOKEN_STAR mixed_expression 	 { $$ = $1 * $3; }
-// 	| expression TOKEN_SLASH mixed_expression	 { $$ = $1 / $3; }
-// 	| mixed_expression TOKEN_PLUS expression	 	 { $$ = $1 + $3; }
-// 	| mixed_expression TOKEN_MINUS expression	 	 { $$ = $1 - $3; }
-// 	| mixed_expression TOKEN_STAR expression 	 { $$ = $1 * $3; }
-// 	| mixed_expression TOKEN_SLASH expression	 { $$ = $1 / $3; }
-// 	| expression TOKEN_SLASH expression		 { $$ = $1 / (float)$3; }
-// ;
+/* expr_fun
+	: TOKEN_FUN TOKEN_LPAREN idents TOKEN_RPAREN expr_block */
 
-// expression
-// 	: TOKEN_INT
-// 		{
-// 			$$ = $1;
-// 		}
-// 	| expression TOKEN_PLUS expression	{ $$ = $1 + $3; }
-// 	| expression TOKEN_MINUS expression	{ $$ = $1 - $3; }
-// 	| expression TOKEN_STAR expression	{ $$ = $1 * $3; }
-// 	| TOKEN_LEFT expression TOKEN_RIGHT		{ $$ = $2; }
-// ;
+idents
+	: idents_build
+		{
+			string_vec_vec res = string_vec_vec_copy(&parser->string_vec_vec_builder);
+			string_vec_vec_clear(&parser->string_vec_vec_builder);
+			$$ = res;
+		}
+
+idents_build
+	: idents_build TOKEN_IDENT { string_vec_vec_push(&parser_state->string_vec_builder, $2); }
+;
+
+expr_op
+	: expr_op TOKEN_PLUS expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_ADD, $3); }
+	| expr_op TOKEN_MINUS expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_SUB, $3); }
+	| expr_op TOKEN_STAR expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_MUL, $3); }
+	| expr_op TOKEN_SLASH expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_DIV, $3); }
+	| expr_op TOKEN_AND expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_AND, $3); }
+	| expr_op TOKEN_OR expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_OR, $3); }
+	| expr_op TOKEN_GT expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_GT, $3); }
+	| expr_op TOKEN_GT_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_GT_EQ, $3); }
+	| expr_op TOKEN_LT_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_LT_EQ, $3); }
+	| expr_op TOKEN_EQ_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_EQ, $3); }
+	| expr_op TOKEN_BANG_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_NEQ, $3); }
+	| TOKEN_RETURN expr_op { $$ = (expr){ EXPR_RETURN, { .expr_return = ALLOC_EXPR($2) } }; }
+	| TOKEN_BANG expr_op { $$ = MAKE_EXPR_UNARY(EXPR_OP_NOT, $2); }
+	| expr_atom { $$ = $1; }
+;	
+
+expr_block
+	: expr_block_internal { stmt_vec_clear(&parser_state->stmt_vec_builder); $$ = $1; }
+;
+
+expr_block_internal
+	: TOKEN_LBRACE stmt_build TOKEN_RBRACE
+		{
+			$$ = (expr_block) {
+				.stmts = stmt_vec_copy(&parser_state->stmt_vec_builder),
+				.last = NULL,
+			};
+		}
+	| TOKEN_LBRACE stmt_build expr TOKEN_RBRACE
+		{
+			$$ = (expr_block) {
+				.stmts = stmt_vec_copy(&parser_state->stmt_vec_builder),
+				.last = ALLOC_EXPR($3),
+			};
+		}
+;
+	
+stmt_build
+	: /* empty */ { }
+	| stmt_build stmt { stmt_vec_push(&parser_state->stmt_vec_builder, $2); }
+
+expr_atom
+	: TOKEN_INT { $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
+	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, { .expr_bool = true } }; }
+	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, { .expr_bool = false } }; }
+	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
+	| expr_block { $$ = (expr){EXPR_BLOCK, { .expr_block = $1 } }; }
+	| TOKEN_RETURN { $$ = (expr){EXPR_RETURN, { .expr_return = NULL }}; }
+;
 
 %%
 
@@ -133,7 +203,7 @@ run_calculator() {
 	return 0;
 }
 
-void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, const char *s) {
+void yyerror(YYLTYPE* yyllocp, __attribute__((unused)) yyscan_t scanner, parser_state *parser_state, const char *s) {
 	fprintf(stderr, "%d:%d: Parse error: %s", yyllocp->first_line, yyllocp->first_column, s);
 	/* char *last_error = scanner->yyextra_r.last_error;
 	if (last_error[0] != '\0') {

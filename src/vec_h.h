@@ -41,5 +41,11 @@ VEC JOIN(VEC, copy)(const VEC *vec);
 
 void JOIN(VEC, clear)(VEC *vec);
 
+VEC_TYPE *JOIN(VEC, alloc)(VEC *vec, VEC_TYPE t);
+
+#ifndef VEC_EXTEND
 #undef VEC
 #undef VEC_TYPE
+#undef VEC_TYPE_FREE
+#undef VEC_TYPE_COPY
+#endif

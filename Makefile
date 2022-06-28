@@ -2,7 +2,7 @@
 CC = gcc
 # add -I $(SRC) for the generated files
 CFLAGS = -Wextra -Wall -std=gnu17 -I $(GEN_INCLUDE) -I $(SRC)
-LIBS = -lm
+LIBS = -lm -lgmp
 
 # directories
 TARGET = ./target
@@ -73,6 +73,14 @@ cleanparser:
 .PHONY: check
 check:
 	cppcheck $(SRC)
+	
+.PHONY: bisonreport
+bisonreport:
+	bison $(PARSER_BISON) --html=target/parser_report.html
+	rm parser.tab.c
+	rm parser.xml
+	xdg-open target/parser_report.html
+
 
 # executable
 $(EXE): $(OBJS) | $(TARGET)

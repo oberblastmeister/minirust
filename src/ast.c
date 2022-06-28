@@ -1,15 +1,11 @@
 #include "ast.h"
 #include "memory.h"
 
-void test(void) {}
+#define VEC_TYPE expr
+#include "vec.h"
 
-void do_something(void) {
-    autofree expr *left = malloc(sizeof(expr));
-    *left = (expr){.tag = EXPR_CONST, .data = {.expr_const = 1}};
-    autofree expr *right = malloc(sizeof(expr));
-    *right = (expr){.tag = EXPR_CONST, .data = {.expr_const = 1}};
-    expr expr = {.tag = EXPR_ADD,
-                 .data = {
-                     .expr_add = {.left = left, .right = right},
-                 }};
-}
+#define VEC_TYPE stmt
+#include "vec.h"
+
+#define VEC_TYPE decl
+#include "vec.h"

@@ -1,9 +1,4 @@
-#ifndef VEC_TYPE
-#error "VEC_TYPE undefined"
-// do this just to get better support for clangd
-// the file will already fail to compile
-#define VEC_TYPE int
-#endif
+// ah yes, module functors in c
 
 #include "bits.h"
 #include "macro_util.h"
@@ -11,22 +6,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef VEC_STATIC
-#define is_static static
-#else
-#define is_static
-#endif
-
 #define VEC JOIN(VEC_TYPE, vec)
 
-#ifndef VEC_DEFINED
+#ifndef VEC_TYPE
+#error "VEC_TYPE undefined"
+// do this just to get better support for clangd
+// the file will already fail to compile
+#define VEC_TYPE int
 typedef struct {
     size_t len;
     size_t cap;
     VEC_TYPE *data;
 } VEC;
+#endif
+
+#ifdef VEC_STATIC
+#define is_static static
 #else
-#undef VEC_DEFINED
+#define is_static
 #endif
 
 static void JOIN(VEC, maybe_resize_)(VEC *vec) {
@@ -78,7 +75,17 @@ is_static VEC_TYPE JOIN(VEC, index)(const VEC *vec, int i) {
     return vec->data[i];
 }
 
+is_static void JOIN(VEC, clear)(VEC *vec) {
+#ifdef VEC_TYPE_FREE
+    for (size_t i = 0; i < vec->len; i++) {
+        VEC_TYPE_FREE(&vec->data[i]);
+    }
+#endif
+    vec->len = 0;
+}
+
 is_static void JOIN(VEC, free)(VEC *vec) {
+    JOIN(VEC, clear)(vec);
     if (vec->data != NULL) {
         free(vec->data);
         JOIN(VEC, init)(vec);
@@ -87,13 +94,21 @@ is_static void JOIN(VEC, free)(VEC *vec) {
 
 is_static size_t JOIN(VEC, len)(const VEC *vec) { return vec->len; }
 
+#ifdef VEC_TYPE_COPY
+is_static VEC JOIN(VEC, copy)(const VEC *vec) {
+    VEC_TYPE *data = malloc(sizeof(VEC_TYPE) * vec->cap);
+    for (size_t i = 0; i < vec->len; i++) {
+        data[i] = VEC_TYPE_COPY(&vec->data[i]);
+    }
+    return (VEC){.len = vec->len, .cap = vec->cap, .data = data};
+}
+#else
 is_static VEC JOIN(VEC, copy)(const VEC *vec) {
     VEC_TYPE *data = malloc(sizeof(VEC_TYPE) * vec->cap);
     memcpy(data, vec->data, sizeof(VEC_TYPE) * vec->len);
     return (VEC){.len = vec->len, .cap = vec->cap, .data = data};
 }
-
-is_static void JOIN(VEC, clear)(VEC *vec) { vec->len = 0; }
+#endif
 
 is_static VEC_TYPE *JOIN(VEC, ptr_at)(VEC *vec, int i) { return &vec->data[i]; }
 
@@ -102,7 +117,11 @@ is_static VEC_TYPE *JOIN(VEC, alloc)(VEC *vec, VEC_TYPE t) {
     return &vec->data[vec->len - 1];
 }
 
+#ifndef VEC_EXTEND
 #undef is_static
 #undef VEC
 #undef VEC_STATIC
 #undef VEC_TYPE
+#undef VEC_TYPE_FREE
+#undef VEC_TYPE_COPY
+#endif

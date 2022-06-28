@@ -13,7 +13,7 @@ lexer_state lexer_state_new(void) {
 void lexer_state_reset(lexer_state *state) {
     state->lexer_column = 1;
     state->lexer_line = 1;
-    // state->last_error = "";
+    state->last_error = const_string_vec_new("");
 }
 
 void lexer_state_free(lexer_state *state) {

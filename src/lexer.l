@@ -1,5 +1,3 @@
-%option noyywrap
-
 %{
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +7,7 @@
 #include "vec_util.h"
 #include "lexer_state.h"
 #include "parser_state.h"
+#include "memory.h"
 
 #define PUSH_BYTE(b) uint8_t_vec_push(&yyextra->lexer_state.string_builder, b)
 
@@ -20,6 +19,8 @@
 %}
 
 %option reentrant
+%option noyywrap
+%option noinput nounput
 %option bison-bridge bison-locations
 %option extra-type="parser_state *"
 
@@ -40,6 +41,7 @@ IDENT_START {ALPHA}|"_"
 "}" { return TOKEN_RBRACE; }
 "(" { return TOKEN_LPAREN; }
 ")" { return TOKEN_RPAREN; }
+";" { return TOKEN_SEMI; }
 "," { return TOKEN_COMMA; }
 "." { return TOKEN_DOT; }
 "+" { return TOKEN_PLUS; }
@@ -77,6 +79,7 @@ or { return TOKEN_OR; }
 if { return TOKEN_IF; }
 else { return TOKEN_ELSE; }
 while { return TOKEN_WHILE; }
+loop { return TOKEN_LOOP; }
 let { return TOKEN_LET; }
 mut { return TOKEN_MUT; }
 false { return TOKEN_FALSE; }
@@ -97,13 +100,12 @@ this { return TOKEN_THIS; }
     return TOKEN_INT;
 }
 {IDENT_START}({IDENT_START}|{DIGIT})* { 
-    printf("yyleng: %d\n", yyleng);
     // yyleng does not include the null
     yylval->string_vec_value = string_vec_new_n(yytext, yyleng + 1);
     return TOKEN_IDENT;
 }
 . {
-    // yyextra->lexer_state.last_error = "Unknown token";
+    yyextra->lexer_state.last_error = const_string_vec_new("Unknown token");
     return TOKEN_ERROR;
 }
 
@@ -113,7 +115,7 @@ void run_lexer_debug(void) {
 	yyscan_t scanner;
     YYSTYPE lval;
     YYLTYPE lloc;
-    parser_state parser_state = parser_state_new();
+    cleanup(parser_state_free) parser_state parser_state = parser_state_new();
   	yylex_init_extra(&parser_state, &scanner);
 	yyset_in(stdin, scanner);
     yyset_out(stdout, scanner);

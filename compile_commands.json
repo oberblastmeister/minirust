@@ -286,5 +286,89 @@
    "target/gen/src/parser.c"
   ],
   "file": "target/gen/src/parser.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/bits.d",
+   "-c",
+   "-o",
+   "target/obj/bits.o",
+   "src/bits.c"
+  ],
+  "file": "src/bits.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/hash.d",
+   "-c",
+   "-o",
+   "target/obj/hash.o",
+   "src/hash.c"
+  ],
+  "file": "src/hash.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/string_vec.d",
+   "-c",
+   "-o",
+   "target/obj/string_vec.o",
+   "src/string_vec.c"
+  ],
+  "file": "src/string_vec.c"
+ },
+ {
+  "directory": "/home/brian/projects/lox",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-MMD",
+   "-MF",
+   "./target/dep/test.d",
+   "-c",
+   "-o",
+   "target/obj/test.o",
+   "src/test.c"
+  ],
+  "file": "src/test.c"
  }
 ]

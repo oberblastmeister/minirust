@@ -21,12 +21,17 @@
             clang-tools
             clang-analyzer
             cppcheck
+            flex
+            bison
+            # used by bison to produce html file
+            libxslt
+            # generate compile_commands.json
+            python310Packages.compiledb
           ];
           buildInputs = with pkgs; [
             gcc
             criterion
-            flex
-            bison
+            gmp
           ];
         };
       }

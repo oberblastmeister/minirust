@@ -16,3 +16,7 @@ uint8_t_vec string_vec_new_n(char *s, size_t n) {
 void string_vec_free(string_vec *string_vec) {
     uint8_t_vec_free(string_vec);
 }
+
+string_vec string_vec_copy(string_vec *string_vec) {
+    return uint8_t_vec_copy(string_vec);
+}
