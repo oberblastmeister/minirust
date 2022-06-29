@@ -75,6 +75,7 @@ IDENT_START {ALPHA}|"_"
 <STRING_SC>\\\\ { PUSH_BYTE((uint8_t)'\\'); }
 <STRING_SC>\\n { PUSH_BYTE((uint8_t)'\n'); }
 <STRING_SC>\\\" { PUSH_BYTE((uint8_t)'\"'); }
+nil { return TOKEN_NIL; }
 and { return TOKEN_AND; }
 or { return TOKEN_OR; }
 if { return TOKEN_IF; }

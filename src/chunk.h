@@ -5,17 +5,6 @@
 #include "prelude.h"
 #include "value.h"
 
-typedef enum {
-    OP_CONSTANT,
-    OP_CONSTANT_16,
-    OP_ADD,
-    OP_SUBTRACT,
-    OP_MULTIPLY,
-    OP_DIVIDE,
-    OP_NEGATE,
-    OP_RETURN,
-} op_code;
-
 typedef struct {
     uint8_t_vec instructions;
     value_vec constants;

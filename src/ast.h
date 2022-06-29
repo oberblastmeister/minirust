@@ -65,21 +65,43 @@ typedef struct {
     expr *expr;
 } expr_unary;
 
-typedef struct {
-    expr *cond;
-    expr_block then_expr;
-} expr_if;
+typedef struct if_cont if_cont;
 
 typedef struct {
     expr *cond;
-    expr_block then_expr;
-    expr_block else_expr;
-} expr_if_else;
+    expr_block body;
+    if_cont *cont;
+} if_cont_if_else;
+
+typedef struct {
+} cont_none;
+
+struct if_cont {
+    enum {
+        IF_CONT_IF_ELSE,
+        IF_CONT_ELSE,
+        IF_CONT_NONE,
+    } tag;
+    struct {
+        expr_block cont_else;
+        if_cont_if_else cont_if_else;
+        cont_none cont_none;
+    } data;
+};
+
+#define VEC_TYPE if_cont
+#include "vec_h.h"
 
 typedef struct {
     expr *cond;
     expr_block body;
 } expr_while;
+
+typedef struct {
+    expr *cond;
+    expr_block then_expr;
+    if_cont cont;
+} expr_if;
 
 typedef struct {
     expr_block body;
@@ -95,8 +117,10 @@ typedef struct {
     expr_vec args;
 } expr_call;
 
+typedef struct {} expr_nil;
 struct expr {
     enum {
+        EXPR_NIL,
         EXPR_INT,
         EXPR_DOUBLE,
         EXPR_BOOL,
@@ -113,13 +137,13 @@ struct expr {
         EXPR_IDENT,
     } tag;
     union {
+        expr_nil expr_nil;
         int expr_int;
         double expr_double;
         bool expr_bool;
         expr_bin expr_bin;
         expr_unary expr_unary;
         expr_if expr_if;
-        expr_if_else expr_if_else;
         expr_while expr_while;
         expr_loop expr_loop;
         expr_fun expr_fun;
@@ -145,4 +169,14 @@ typedef struct {
 typedef struct {
     decl_vec decls;
 } program;
+
+typedef struct {
+    expr_vec expr_arena;
+    if_cont_vec if_cont_arena;
+} ast_arena;
+
+ast_arena ast_arena_new(void);
+
+void ast_arena_free(ast_arena *ast_arena);
+
 #endif

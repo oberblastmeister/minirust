@@ -1,8 +1,9 @@
 #include "vm.h"
 #include "io_ext.h"
+#include "opcode.h"
 #include "value.h"
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 vm vm_new(chunk chunk) {
     vm vm = {.chunk = chunk, .ip = chunk.instructions.data};
@@ -42,7 +43,16 @@ interpret_result vm_run(vm *vm) {
     while (true) {
         uint8_t instruction;
         switch (instruction = *vm->ip++) {
-        case OP_CONSTANT: {
+        case OP_TRUE: {
+            vm_push(vm, value_bool(true));
+            break;
+        }
+        case OP_FALSE: {
+            vm_push(vm, value_bool(false));
+            break;
+        }
+        case OP_CONST: {
+            printf("got const\n");
             value constant = value_vec_index(&vm->chunk.constants, *vm->ip++);
             vm_push(vm, constant);
             break;
@@ -53,32 +63,40 @@ interpret_result vm_run(vm *vm) {
                 double b = value_as_double(vm_pop(vm));
                 double a = value_as_double(vm_pop(vm));
                 vm_push(vm, value_double(a + b));
+            } else if (value_is_int(vm_peek(vm, 0)) &&
+                       value_is_int(vm_peek(vm, 1))) {
+                int b = value_as_int(vm_pop(vm));
+                int a = value_as_int(vm_pop(vm));
+                vm_push(vm, value_int(a + b));
             } else {
                 RUNTIME_ERROR("incorrect operands for add");
             }
             break;
         }
-        case OP_SUBTRACT: {
+        case OP_SUB: {
             // BINARY_OP(vm, -);
             break;
         }
-        case OP_MULTIPLY: {
+        case OP_MUL: {
             // BINARY_OP(vm, *);
             break;
         }
-        case OP_DIVIDE: {
+        case OP_DIV: {
             // BINARY_OP(vm, /);
             break;
         }
-        case OP_NEGATE: {
+        case OP_NEG: {
             // vm_push(vm, -vm_pop(vm));
             break;
         }
-        case OP_RETURN: {
+        case OP_RET: {
             puts("Got return");
             value_print(vm_pop(vm));
             puts("");
             return INTERPRET_OK;
+        }
+        default: {
+            RUNTIME_ERROR("don't know how to interpret operator");
         }
         }
     }

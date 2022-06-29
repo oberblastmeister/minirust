@@ -39,9 +39,11 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 	string_vec_vec string_vec_vec;
 	expr_block expr_block;
 	expr_vec expr_vec;
+	if_cont if_cont;
 }
 
 // values
+%token TOKEN_NIL
 %token<int_value> TOKEN_INT
 %token<double_value> TOKEN_DOUBLE
 %token<string_vec_value> TOKEN_STRING
@@ -84,6 +86,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %type<decl> decl
 %type<stmt> stmt
 %type<expr> expr expr_op expr_atom expr_fun expr_call expr_if expr_control_arg expr_no_control_arg
+%type<if_cont> if_cont
 %type<expr_block> expr_block expr_block_internal
 %type<string_vec_vec> params
 %type<expr_vec> args
@@ -137,7 +140,7 @@ expr_control_arg
 // or they can take an argument. So the block the comes right after can be ambiguous.
 // is it an argument? or is it part of the if statement?
 expr_if
-	: TOKEN_IF expr_no_control_arg expr_block
+	: TOKEN_IF expr_no_control_arg expr_block if_cont
 		{
 			$$ = (expr){
 				EXPR_IF,
@@ -145,23 +148,30 @@ expr_if
 					.expr_if = {
 						.cond = ALLOC_EXPR($2),
 						.then_expr = $3,
+						.cont = $4,
 					}
 				}
 			};
 		}
-	| TOKEN_IF expr_no_control_arg expr_block TOKEN_ELSE expr_block
+;
+
+if_cont
+	: /* empty */ { $$ = (if_cont){IF_CONT_NONE, {.cont_none = { } }}; }
+	| TOKEN_ELSE expr_block { $$ = (if_cont){IF_CONT_ELSE, {.cont_else = $2} }; }
+	| TOKEN_ELSE TOKEN_IF expr_no_control_arg expr_block if_cont	
 		{
-			$$ = (expr){
-				EXPR_IF_ELSE,
+			$$ = (if_cont){
+				IF_CONT_IF_ELSE,
 				{
-					.expr_if_else = {
-						.cond = ALLOC_EXPR($2),
-						.then_expr = $3,
-						.else_expr = $5,
+					.cont_if_else = {
+						.cond = ALLOC_EXPR($3),
+						.body = $4,
+						.cont = if_cont_vec_alloc(&parser_state->ast_arena.if_cont_arena, $5),
 					}
 				}
 			};
 		}
+;
 
 expr_fun
 	: TOKEN_FUN TOKEN_LPAREN params TOKEN_RPAREN expr_block
@@ -237,7 +247,8 @@ stmt_build
 ;
 
 expr_atom
-	: TOKEN_INT { printf("got int\n"); $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
+	: TOKEN_NIL { $$ = (expr){EXPR_NIL, {.expr_nil = {}}}; }
+	| TOKEN_INT { printf("got int\n"); $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
 	| TOKEN_DOUBLE { printf("got int\n"); $$ = (expr){ EXPR_DOUBLE, { .expr_double = $1 } }; }
 	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, { .expr_bool = true } }; }
 	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, { .expr_bool = false } }; }
