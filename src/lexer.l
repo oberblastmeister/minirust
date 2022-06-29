@@ -21,6 +21,7 @@
 %option reentrant
 %option noyywrap
 %option noinput nounput
+%option 8bit nodefault
 %option bison-bridge bison-locations
 %option extra-type="parser_state *"
 
@@ -92,10 +93,12 @@ class { return TOKEN_CLASS; }
 super { return TOKEN_SUPER; }
 this { return TOKEN_THIS; }
 {DIGIT}+"."{DIGIT}+ {
-    yylval->float_value = strtod(yytext, NULL);
-    return TOKEN_FLOAT;
+    printf("got double: %s\n", yytext);
+    yylval->double_value = strtod(yytext, NULL);
+    return TOKEN_DOUBLE;
 }
 {DIGIT}+ {
+    printf("token int\n");
     yylval->int_value = atoi(yytext);
     return TOKEN_INT;
 }

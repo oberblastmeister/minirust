@@ -1,7 +1,7 @@
 # compilation
 CC = gcc
 # add -I $(SRC) for the generated files
-CFLAGS = -Wextra -Wall -std=gnu17 -I $(GEN_INCLUDE) -I $(SRC)
+CFLAGS = -Wextra -Wall -std=gnu17 -I $(GEN_INCLUDE) -I $(SRC) -g
 LIBS = -lm -lgmp
 
 # directories

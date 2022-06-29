@@ -31,7 +31,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 
 %union {
 	int int_value;
-	double float_value;
+	double double_value;
 	string_vec string_vec_value;
 	expr expr;
 	stmt stmt;
@@ -43,7 +43,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 
 // values
 %token<int_value> TOKEN_INT
-%token<float_value> TOKEN_FLOAT
+%token<double_value> TOKEN_DOUBLE
 %token<string_vec_value> TOKEN_STRING
 // delimiters
 %token TOKEN_LBRACE TOKEN_RBRACE
@@ -65,10 +65,10 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %token TOKEN_FUN TOKEN_FOR TOKEN_PRINT TOKEN_RETURN TOKEN_LOOP
 %token TOKEN_CLASS TOKEN_SUPER TOKEN_THIS
 // lexer errors
-%token<string_vec_value> TOKEN_ERROR
+%token TOKEN_ERROR
 
 // used during error recovery
-%destructor { uint8_t_vec_free(&$$); } <string_vec_value>
+/* %destructor { uint8_t_vec_free(&$$); } <string_vec_value> */
 
 // precedence
 %left TOKEN_RETURN
@@ -89,7 +89,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %type<expr_vec> args
 
 %start decl stmt expr expr_atom expr_block
-%start expr_fun
+%start expr_fun nothing
 
 %%
 
@@ -113,9 +113,12 @@ stmt
 		}
 ;
 
+nothing
+	: /* EMPTY */ { }
+
 expr
-	: expr_control_arg { $$ = $1; }
-	| expr_no_control_arg { $$ = $1; }
+	: expr_control_arg { printf("control\n"); $$ = $1; }
+	| expr_no_control_arg { printf("no control\n"); $$ = $1; }
 ;
 
 expr_no_control_arg
@@ -203,7 +206,7 @@ expr_op
 	| expr_op TOKEN_EQ_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_EQ, $3); }
 	| expr_op TOKEN_BANG_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_NEQ, $3); }
 	| TOKEN_BANG expr_op { $$ = MAKE_EXPR_UNARY(EXPR_OP_NOT, $2); }
-	| expr_atom { $$ = $1; }
+	| expr_atom { printf("atom\n"); $$ = $1; }
 	
 ;	
 
@@ -234,13 +237,14 @@ stmt_build
 ;
 
 expr_atom
-	: TOKEN_INT { $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
+	: TOKEN_INT { printf("got int\n"); $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
+	| TOKEN_DOUBLE { printf("got int\n"); $$ = (expr){ EXPR_DOUBLE, { .expr_double = $1 } }; }
 	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, { .expr_bool = true } }; }
 	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, { .expr_bool = false } }; }
 	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
 	| expr_block { $$ = (expr){EXPR_BLOCK, { .expr_block = $1 } }; }
 	| expr_call { $$ = $1; }
-	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, { .expr_ident = $1} }; }
+	| TOKEN_IDENT { printf("got ident\n"); $$ = (expr){EXPR_IDENT, { .expr_ident = $1} }; }
 ;
 
 expr_call
@@ -286,23 +290,28 @@ void parse_file(FILE *in, parser_state *parser_state) {
 	int res = yyparse(parser_state, scanner);
 	yylex_destroy(scanner);
 }
-	
-run_calculator() {
 
-	// yyin = stdin;
-
-	// do {
-	// 	yyparse();
-	// } while(!feof(yyin));
-
-	return 0;
+yyparse_expr_t parse_string_expr(const char *s, parser_state *parser_state) {
+	yyscan_t scanner;          
+  	yylex_init_extra(parser_state, &scanner);
+	YY_BUFFER_STATE buf = yy_scan_string(s, scanner);
+	yyparse_expr_t res = yyparse_expr(scanner, parser_state);
+	yy_delete_buffer(buf, scanner);
+	yylex_destroy(scanner);
+	return res;
 }
-
+	
 void yyerror(YYLTYPE* yyllocp, __attribute__((unused)) yyscan_t scanner, parser_state *parser_state, const char *s) {
+	// don't print too many errors
+	if (parser_state->errors_amount > 4) {
+		return;
+	}
 	fprintf(stderr, "%d:%d: Parse error: %s", yyllocp->first_line, yyllocp->first_column, s);
-	/* char *last_error = scanner->yyextra_r.last_error;
+	uint8_t *last_error = parser_state->lexer_state.last_error.data;
 	if (last_error[0] != '\0') {
 		fprintf(stderr, ": %s\n", last_error);
-	} */
+	} else {
+		puts("");
+	}
 	parser_state->errors_amount++;
 }

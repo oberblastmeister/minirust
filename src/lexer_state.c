@@ -5,7 +5,7 @@ lexer_state lexer_state_new(void) {
     return (lexer_state){
         .lexer_column = 1,
         .lexer_line = 1,
-        .string_builder = uint8_t_vec_new(),
+        .string_builder = const_string_vec_new(""),
         .last_error = const_string_vec_new(""),
     };
 }

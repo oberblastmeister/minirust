@@ -1,18 +1,55 @@
 #include "chunk.h"
+#include "compiler.h"
 #include "debug.h"
+#include "io_ext.h"
+#include "lexer_wrapper.h"
 #include "memory.h"
+#include "parser.h"
+#include "parser_wrapper.h"
 #include "prelude.h"
 #include "uint8_t_vec.h"
 #include "vm.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "parser.h"
-#include "lexer_wrapper.h"
+
+static interpret_result interpret(char *s) {
+    parser_state parser_state = parser_state_new();
+    yyparse_expr_t res = parse_string_expr(s, &parser_state);
+    if (res.yynerrs > 0) {
+        return INTERPRET_PARSE_ERROR;
+    }
+    expr expr = res.yyvalue;
+    compiler compiler = compiler_new();
+    compile_expr(&compiler, &expr);
+    compile_return(&compiler, NULL);
+    if (compiler.did_error) {
+        return INTERPRET_COMPILE_ERROR;
+    }
+    cleanup(vm_free) vm vm = vm_new(compiler.chunk);
+    return vm_run(&vm);
+}
+
+static void repl() {
+    char line[1024];
+    while (true) {
+        put("> ");
+        if (!fgets(line, sizeof(line), stdin)) {
+            printf("\n");
+            break;
+        }
+        interpret(line);
+    }
+}
+
+// static void run_file(const char *path){
+//     char *source = read
+// }
 
 int main(int argc, const char *argv[]) {
-    run_lexer_debug();
-    run_calculator();
+    // run_lexer_debug();
+    // interpret("2.0 + 1.0");
+    repl();
 
     // chunk chunk = chunk_new();
     // int constant_i = chunk_add_constant(&chunk, 1.2);
@@ -38,5 +75,5 @@ int main(int argc, const char *argv[]) {
 }
 
 // void test(int n, char s[n]) {
-    
+
 // }

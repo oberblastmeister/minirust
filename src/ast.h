@@ -56,7 +56,7 @@ typedef struct {
     } op;
     expr *left;
     expr *right;
-} bin_expr;
+} expr_bin;
 
 typedef struct {
     enum {
@@ -98,6 +98,7 @@ typedef struct {
 struct expr {
     enum {
         EXPR_INT,
+        EXPR_DOUBLE,
         EXPR_BOOL,
         EXPR_BIN,
         EXPR_UNARY,
@@ -113,8 +114,9 @@ struct expr {
     } tag;
     union {
         int expr_int;
+        double expr_double;
         bool expr_bool;
-        bin_expr expr_bin;
+        expr_bin expr_bin;
         expr_unary expr_unary;
         expr_if expr_if;
         expr_if_else expr_if_else;

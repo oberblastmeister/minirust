@@ -20,4 +20,16 @@ typedef struct {
 
 void value_print(value value);
 
+static inline value value_double(double d) {
+    return (value){VALUE_DOUBLE, {.value_double = d}};
+}
+
+static inline bool value_is_double(value value) {
+    return value.tag == VALUE_DOUBLE;
+}
+
+static inline double value_as_double(value value) {
+    return value.value_double;
+}
+
 #endif
