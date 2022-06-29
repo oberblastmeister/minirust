@@ -68,8 +68,13 @@ typedef struct {
 typedef struct {
     expr *cond;
     expr_block then_expr;
-    expr_block else_expr;
 } expr_if;
+
+typedef struct {
+    expr *cond;
+    expr_block then_expr;
+    expr_block else_expr;
+} expr_if_else;
 
 typedef struct {
     expr *cond;
@@ -80,12 +85,15 @@ typedef struct {
     expr_block body;
 } expr_loop;
 
-typedef string_vec param;
-
 typedef struct {
     string_vec_vec params;
     expr_block body;
 } expr_fun;
+
+typedef struct {
+    expr *expr_fun;
+    expr_vec args;
+} expr_call;
 
 struct expr {
     enum {
@@ -94,11 +102,14 @@ struct expr {
         EXPR_BIN,
         EXPR_UNARY,
         EXPR_IF,
+        EXPR_IF_ELSE,
         EXPR_WHILE,
         EXPR_LOOP,
         EXPR_FUN,
         EXPR_RETURN,
         EXPR_BLOCK,
+        EXPR_CALL,
+        EXPR_IDENT,
     } tag;
     union {
         int expr_int;
@@ -106,11 +117,14 @@ struct expr {
         bin_expr expr_bin;
         expr_unary expr_unary;
         expr_if expr_if;
+        expr_if_else expr_if_else;
         expr_while expr_while;
         expr_loop expr_loop;
         expr_fun expr_fun;
         expr *expr_return;
         expr_block expr_block;
+        expr_call expr_call;
+        string_vec expr_ident;
     } data;
 };
 

@@ -38,6 +38,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 	decl decl;
 	string_vec_vec string_vec_vec;
 	expr_block expr_block;
+	expr_vec expr_vec;
 }
 
 // values
@@ -80,15 +81,15 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %left TOKEN_STAR TOKEN_SLASH
 %left TOKEN_BANG
 
-/* %type<int_value> expression
-%type<float_value> mixed_expression */
 %type<decl> decl
 %type<stmt> stmt
-%type<expr> expr expr_op expr_atom 
+%type<expr> expr expr_op expr_atom expr_fun expr_call expr_if expr_control_arg expr_no_control_arg
 %type<expr_block> expr_block expr_block_internal
-%type<string_vec_vec> idents;
+%type<string_vec_vec> params
+%type<expr_vec> args
 
 %start decl stmt expr expr_atom expr_block
+%start expr_fun
 
 %%
 
@@ -113,22 +114,80 @@ stmt
 ;
 
 expr
-	: expr_op { $$ = $1; }
+	: expr_control_arg { $$ = $1; }
+	| expr_no_control_arg { $$ = $1; }
 ;
 
-/* expr_fun
-	: TOKEN_FUN TOKEN_LPAREN idents TOKEN_RPAREN expr_block */
+expr_no_control_arg
+	: expr_op { $$ = $1; }
+	| expr_fun { $$ = $1; }
+	| expr_if { $$ = $1; }
+	| TOKEN_RETURN { $$ = (expr){EXPR_RETURN, { .expr_return = NULL }}; }
+;
 
-idents
-	: idents_build
+
+expr_control_arg
+	: TOKEN_RETURN expr_op { $$ = (expr){ EXPR_RETURN, { .expr_return = ALLOC_EXPR($2) } }; }
+;
+
+// these need expr_no_control_arg because the control expression can be by themselves,
+// or they can take an argument. So the block the comes right after can be ambiguous.
+// is it an argument? or is it part of the if statement?
+expr_if
+	: TOKEN_IF expr_no_control_arg expr_block
 		{
-			string_vec_vec res = string_vec_vec_copy(&parser->string_vec_vec_builder);
-			string_vec_vec_clear(&parser->string_vec_vec_builder);
-			$$ = res;
+			$$ = (expr){
+				EXPR_IF,
+				{
+					.expr_if = {
+						.cond = ALLOC_EXPR($2),
+						.then_expr = $3,
+					}
+				}
+			};
+		}
+	| TOKEN_IF expr_no_control_arg expr_block TOKEN_ELSE expr_block
+		{
+			$$ = (expr){
+				EXPR_IF_ELSE,
+				{
+					.expr_if_else = {
+						.cond = ALLOC_EXPR($2),
+						.then_expr = $3,
+						.else_expr = $5,
+					}
+				}
+			};
 		}
 
-idents_build
-	: idents_build TOKEN_IDENT { string_vec_vec_push(&parser_state->string_vec_builder, $2); }
+expr_fun
+	: TOKEN_FUN TOKEN_LPAREN params TOKEN_RPAREN expr_block
+		{
+			$$ = (expr){
+				EXPR_FUN,
+				{
+					.expr_fun = {
+						.params = $3,
+						.body = $5,
+					}
+				}
+			};
+		}
+;
+
+params
+	: /* empty */ { }
+	| params_build maybe_comma
+		{
+			string_vec_vec res = string_vec_vec_copy(&parser_state->string_vec_vec_builder);
+			string_vec_vec_clear(&parser_state->string_vec_vec_builder);
+			$$ = res;
+		}
+;
+
+params_build
+	: TOKEN_IDENT { string_vec_vec_push(&parser_state->string_vec_vec_builder, $1); }
+	| params_build ',' TOKEN_IDENT { string_vec_vec_push(&parser_state->string_vec_vec_builder, $3); }
 ;
 
 expr_op
@@ -143,9 +202,9 @@ expr_op
 	| expr_op TOKEN_LT_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_LT_EQ, $3); }
 	| expr_op TOKEN_EQ_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_EQ, $3); }
 	| expr_op TOKEN_BANG_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_NEQ, $3); }
-	| TOKEN_RETURN expr_op { $$ = (expr){ EXPR_RETURN, { .expr_return = ALLOC_EXPR($2) } }; }
 	| TOKEN_BANG expr_op { $$ = MAKE_EXPR_UNARY(EXPR_OP_NOT, $2); }
 	| expr_atom { $$ = $1; }
+	
 ;	
 
 expr_block
@@ -172,6 +231,7 @@ expr_block_internal
 stmt_build
 	: /* empty */ { }
 	| stmt_build stmt { stmt_vec_push(&parser_state->stmt_vec_builder, $2); }
+;
 
 expr_atom
 	: TOKEN_INT { $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
@@ -179,8 +239,43 @@ expr_atom
 	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, { .expr_bool = false } }; }
 	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
 	| expr_block { $$ = (expr){EXPR_BLOCK, { .expr_block = $1 } }; }
-	| TOKEN_RETURN { $$ = (expr){EXPR_RETURN, { .expr_return = NULL }}; }
+	| expr_call { $$ = $1; }
+	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, { .expr_ident = $1} }; }
 ;
+
+expr_call
+	: expr_atom TOKEN_LPAREN args TOKEN_RPAREN
+		{
+			$$ = (expr){
+				EXPR_CALL,
+				{
+					.expr_call = {
+						.expr_fun = ALLOC_EXPR($1),
+						.args = $3,
+					}
+				}
+			};
+		}
+;
+	
+args
+	: args_build maybe_comma
+		{
+			expr_vec res = expr_vec_copy(&parser_state->expr_vec_builder);
+			expr_vec_clear(&parser_state->expr_vec_builder);
+			$$ = res;
+		}
+	| /* empty */ { $$ = expr_vec_new(); }
+;
+
+args_build
+	: expr { expr_vec_push(&parser_state->expr_vec_builder, $1); }
+	| args_build ',' expr { expr_vec_push(&parser_state->expr_vec_builder, $3); }
+;
+
+maybe_comma
+	: /* empty */ { }
+	| ',' { }
 
 %%
 

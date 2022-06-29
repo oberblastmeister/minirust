@@ -11,6 +11,7 @@ typedef struct {
     expr_vec expr_arena;
     stmt_vec stmt_vec_builder;
     string_vec_vec string_vec_vec_builder;
+    expr_vec expr_vec_builder;
 } parser_state;
 
 parser_state parser_state_new(void);
