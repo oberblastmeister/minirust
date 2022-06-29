@@ -5,8 +5,18 @@
 #include <stddef.h>
 #include <stdint.h>
 
-static inline int max(int x, int y) { return x > y ? x : y; }
+#define max(a, b)                                                              \
+    ({                                                                         \
+        typeof(a) _a = (a);                                                    \
+        typeof(b) _b = (b);                                                    \
+        _a > _b ? _a : _b;                                                     \
+    })
 
-static inline int min(int x, int y) { return x < y ? x : y; }
+#define min(a, b)                                                              \
+    ({                                                                         \
+        typeof(a) _a = (a);                                                    \
+        typeof(b) _b = (b);                                                    \
+        _a < _b ? _a : _b;                                                     \
+    })
 
 #endif

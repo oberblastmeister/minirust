@@ -19,6 +19,8 @@ typedef struct {
 
 #define VEC_DEFINED
 
+void JOIN(VEC, reserve)(VEC *vec, size_t i);
+
 void JOIN(VEC, init)(VEC *vec);
 
 VEC JOIN(VEC, new)(void);

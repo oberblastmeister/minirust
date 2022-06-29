@@ -6,6 +6,7 @@
 
 typedef struct {
     bool did_error;
+    int stack_length;
     chunk chunk;
 } compiler;
 

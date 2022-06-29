@@ -9,6 +9,8 @@ void value_print(value value) {
         printf("%lf", value_as_double(value));
     } else if (value_is_int(value)) {
         printf("%d", value_as_int(value));
+    } else if (value_is_bool(value)) {
+        puts(value_as_bool(value) ? "true" : "false");
     } else {
         printf("<unknown>");
     }
