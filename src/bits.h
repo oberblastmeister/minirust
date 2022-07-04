@@ -24,28 +24,31 @@ static inline uint64_t next_power_of_2(uint64_t i) {
 
 // see
 // https://stackoverflow.com/questions/776508/best-practices-for-circular-shift-rotate-operations-in-c
-#define MAKE_ROT(T, NAME)                                                      \
-    static inline T rotl##NAME(T n, uint32_t c) {                              \
+#define MAKE_ROT(T)                                                            \
+    static inline T rotl_##T(T n, uint32_t c) {                                \
         const uint32_t mask = (CHAR_BIT * sizeof(n) - 1);                      \
         c &= mask;                                                             \
         return (n << c) | (n >> ((-c) & mask));                                \
     }                                                                          \
-    static inline T rotr##NAME(T n, uint32_t c) {                              \
+    static inline T rotr_##T(T n, uint32_t c) {                                \
         const uint32_t mask = (CHAR_BIT * sizeof(n) - 1);                      \
         c &= mask;                                                             \
         return (n >> c) | (n << ((-c) & mask));                                \
     }
 
-MAKE_ROT(uint8_t, 8)
-MAKE_ROT(uint16_t, 16)
-MAKE_ROT(uint32_t, 32)
-MAKE_ROT(uint64_t, 64)
+#define ROT_LIST_X                                                             \
+    X(size_t)                                                                  \
+    X(uint8_t)                                                                 \
+    X(uint16_t)                                                                \
+    X(uint32_t)                                                                \
+    X(uint64_t)
+
+#define X MAKE_ROT
+ROT_LIST_X
+#undef X
 
 #undef MAKE_ROT
-    
-// #define rotl(n, c) \
-//     _Generic((n), \
-//         uint8_t: rotl8((n), (s))
-//     )
+
+#undef ROT_LIST_X
 
 #endif
