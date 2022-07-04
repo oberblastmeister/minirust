@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef VEC
 #define VEC JOIN(VEC_TYPE, vec)
+#endif
 
 #ifndef VEC_TYPE
 #error "VEC_TYPE undefined"
@@ -36,7 +38,8 @@ static void JOIN(VEC, maybe_resize_)(VEC *vec) {
 
 void JOIN(VEC, reserve)(VEC *vec, size_t i) {
     if (vec->len + i > vec->cap) {
-        vec->cap = min((size_t)8, (size_t)next_power_of_2((uint64_t)vec->len + i));
+        vec->cap =
+            min((size_t)8, (size_t)next_power_of_2((uint64_t)vec->len + i));
         vec->data = realloc(vec->data, sizeof(VEC_TYPE) * vec->cap);
     }
 }

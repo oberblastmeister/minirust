@@ -36,19 +36,34 @@ static inline uint64_t next_power_of_2(uint64_t i) {
         return (n >> c) | (n << ((-c) & mask));                                \
     }
 
-#define ROT_LIST_X                                                             \
-    X(size_t)                                                                  \
-    X(uint8_t)                                                                 \
-    X(uint16_t)                                                                \
-    X(uint32_t)                                                                \
-    X(uint64_t)
-
-#define X MAKE_ROT
-ROT_LIST_X
-#undef X
+MAKE_ROT(size_t)
+MAKE_ROT(uint8_t)
+MAKE_ROT(uint16_t)
+MAKE_ROT(uint32_t)
+MAKE_ROT(uint64_t)
 
 #undef MAKE_ROT
 
-#undef ROT_LIST_X
+#define rotl(n, c)                                                             \
+    ({                                                                         \
+        typeof(n) _n = (n);                                                    \
+        typeof(c) _c = (c);                                                    \
+        _Generic((_n), uint8_t                                                 \
+                 : rotl8(_n, _c), uint16_t                                     \
+                 : rotl16(_n, _c), uint32_t                                    \
+                 : rotl32(_n, _c), uint64_t                                    \
+                 : rotl64(_n, _c));                                            \
+    })
+
+#define rotr(n, c)                                                             \
+    ({                                                                         \
+        typeof(n) _n = (n);                                                    \
+        typeof(c) _c = (c);                                                    \
+        _Generic((n), uint8_t                                                  \
+                 : rotr8(_n, _c), uint16_t                                     \
+                 : rotr16(_n, _c), uint32_t                                    \
+                 : rotr32(_n, _c), uint64_t                                    \
+                 : rotr64(_n, _c));                                            \
+    })
 
 #endif

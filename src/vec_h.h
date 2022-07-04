@@ -9,7 +9,9 @@
 #include "prelude.h"
 #include <stdlib.h>
 
+#ifndef VEC
 #define VEC JOIN(VEC_TYPE, vec)
+#endif
 
 typedef struct {
     size_t len;

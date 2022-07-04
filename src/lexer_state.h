@@ -7,8 +7,8 @@
 typedef struct {
     int lexer_column;
     int lexer_line;
-    string_vec string_builder;
-    string_vec last_error;
+    string string_builder;
+    string last_error;
 } lexer_state;
 
 lexer_state lexer_state_new(void);

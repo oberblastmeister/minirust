@@ -15,6 +15,7 @@
 #include "parser_util.h"
 } 
 %code requires {
+#include "char_vec.h"
 #include "string_vec.h"
 #include "ast.h"
 #include "uint8_t_vec.h"
@@ -32,11 +33,11 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %union {
 	int int_value;
 	double double_value;
+	string string_value;
 	string_vec string_vec_value;
 	expr expr;
 	stmt stmt;
 	decl decl;
-	string_vec_vec string_vec_vec;
 	expr_block expr_block;
 	expr_vec expr_vec;
 	if_cont if_cont;
@@ -46,7 +47,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %token TOKEN_NIL
 %token<int_value> TOKEN_INT
 %token<double_value> TOKEN_DOUBLE
-%token<string_vec_value> TOKEN_STRING
+%token<string_value> TOKEN_STRING
 // delimiters
 %token TOKEN_LBRACE TOKEN_RBRACE
 %token TOKEN_LPAREN TOKEN_RPAREN
@@ -59,7 +60,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %token TOKEN_GT TOKEN_GT_EQ 
 %token TOKEN_LT TOKEN_LT_EQ
 // identifiers
-%token<string_vec_value> TOKEN_IDENT
+%token<string_value> TOKEN_IDENT
 // keywords
 %token TOKEN_AND TOKEN_OR
 %token TOKEN_IF TOKEN_ELSE TOKEN_WHILE TOKEN_LET TOKEN_MUT
@@ -70,7 +71,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %token TOKEN_ERROR
 
 // used during error recovery
-/* %destructor { uint8_t_vec_free(&$$); } <string_vec_value> */
+%destructor { string_free(&$$); } <string_value>
 
 // precedence
 %left TOKEN_RETURN
@@ -88,7 +89,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %type<expr> expr expr_op expr_atom expr_fun expr_call expr_if expr_control_arg expr_no_control_arg
 %type<if_cont> if_cont
 %type<expr_block> expr_block expr_block_internal
-%type<string_vec_vec> params
+%type<string_vec_value> params
 %type<expr_vec> args
 
 %start decl stmt expr expr_atom expr_block
@@ -192,15 +193,15 @@ params
 	: /* empty */ { }
 	| params_build maybe_comma
 		{
-			string_vec_vec res = string_vec_vec_copy(&parser_state->string_vec_vec_builder);
-			string_vec_vec_clear(&parser_state->string_vec_vec_builder);
+			string_vec res = string_vec_copy(&parser_state->string_vec_builder);
+			string_vec_clear(&parser_state->string_vec_builder);
 			$$ = res;
 		}
 ;
 
 params_build
-	: TOKEN_IDENT { string_vec_vec_push(&parser_state->string_vec_vec_builder, $1); }
-	| params_build ',' TOKEN_IDENT { string_vec_vec_push(&parser_state->string_vec_vec_builder, $3); }
+	: TOKEN_IDENT { string_vec_push(&parser_state->string_vec_builder, $1); }
+	| params_build ',' TOKEN_IDENT { string_vec_push(&parser_state->string_vec_builder, $3); }
 ;
 
 expr_op

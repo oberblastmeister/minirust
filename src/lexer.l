@@ -2,14 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "token.h"
-#include "string_vec.h"
-#include "uint8_t_vec.h"
+#include "char_vec.h"
 #include "vec_util.h"
 #include "lexer_state.h"
 #include "parser_state.h"
 #include "memory.h"
 
-#define PUSH_BYTE(b) uint8_t_vec_push(&yyextra->lexer_state.string_builder, b)
+#define PUSH_CHAR(b) char_vec_push(&yyextra->lexer_state.string_builder, b)
 
 #define YY_USER_ACTION \
     yylloc->first_line = yylloc->last_line = yyextra->lexer_state.lexer_line; \
@@ -58,23 +57,23 @@ IDENT_START {ALPHA}|"_"
 "<" { return TOKEN_LT; }
 "<=" { return TOKEN_LT_EQ; }
 \" {
-    uint8_t_vec_clear(&yyextra->lexer_state.string_builder);
+    string_clear(&yyextra->lexer_state.string_builder);
     BEGIN(STRING_SC);
 }
 <STRING_SC>\" {
-    yylval->string_vec_value = uint8_t_vec_copy(&yyextra->lexer_state.string_builder);
+    yylval->string_value = string_copy(&yyextra->lexer_state.string_builder);
     BEGIN(0);
     return TOKEN_STRING;
 }
 <STRING_SC>. {
     // only supports ascii, so only one byte
-    PUSH_BYTE(yytext[0]);
+    PUSH_CHAR(yytext[0]);
 }
-<STRING_SC>\\t { PUSH_BYTE((uint8_t)'\t'); }
-<STRING_SC>\\r { PUSH_BYTE((uint8_t)'\r'); }
-<STRING_SC>\\\\ { PUSH_BYTE((uint8_t)'\\'); }
-<STRING_SC>\\n { PUSH_BYTE((uint8_t)'\n'); }
-<STRING_SC>\\\" { PUSH_BYTE((uint8_t)'\"'); }
+<STRING_SC>\\t { PUSH_CHAR('\t'); }
+<STRING_SC>\\r { PUSH_CHAR('\r'); }
+<STRING_SC>\\\\ { PUSH_CHAR('\\'); }
+<STRING_SC>\\n { PUSH_CHAR('\n'); }
+<STRING_SC>\\\" { PUSH_CHAR('\"'); }
 nil { return TOKEN_NIL; }
 and { return TOKEN_AND; }
 or { return TOKEN_OR; }
@@ -105,11 +104,11 @@ this { return TOKEN_THIS; }
 }
 {IDENT_START}({IDENT_START}|{DIGIT})* { 
     // yyleng does not include the null
-    yylval->string_vec_value = string_vec_new_n(yytext, yyleng + 1);
+    yylval->string_value = string_new_n(yytext, yyleng + 1);
     return TOKEN_IDENT;
 }
 . {
-    yyextra->lexer_state.last_error = const_string_vec_new("Unknown token");
+    yyextra->lexer_state.last_error = const_string_new("Unknown token");
     return TOKEN_ERROR;
 }
 

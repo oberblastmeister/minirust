@@ -2,8 +2,8 @@
 #define _LOX_AST_H
 
 #include "memory.h"
+#include "char_vec.h"
 #include "string_vec.h"
-#include "string_vec_vec.h"
 #include "token_wrapper.h"
 #include "value.h"
 #include <stdlib.h>
@@ -13,7 +13,7 @@ typedef struct expr expr;
 typedef struct stmt stmt;
 
 typedef struct {
-    string_vec name;
+    string name;
     expr *expr;
 } stmt_let;
 
@@ -108,7 +108,7 @@ typedef struct {
 } expr_loop;
 
 typedef struct {
-    string_vec_vec params;
+    string_vec params;
     expr_block body;
 } expr_fun;
 
@@ -150,7 +150,7 @@ struct expr {
         expr *expr_return;
         expr_block expr_block;
         expr_call expr_call;
-        string_vec expr_ident;
+        string expr_ident;
     } data;
 };
 

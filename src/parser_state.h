@@ -2,7 +2,7 @@
 #define _LOX_PARSER_STATE_H
 
 #include "lexer_state.h"
-#include "string_vec_vec.h"
+#include "string_vec.h"
 #include "ast.h"
 
 typedef struct {
@@ -10,7 +10,7 @@ typedef struct {
     lexer_state lexer_state;
     ast_arena ast_arena;
     stmt_vec stmt_vec_builder;
-    string_vec_vec string_vec_vec_builder;
+    string_vec string_vec_builder;
     expr_vec expr_vec_builder;
 } parser_state;
 
