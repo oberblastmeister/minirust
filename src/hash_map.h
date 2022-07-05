@@ -1,10 +1,10 @@
 #include "macro_util.h"
 #include "prelude.h"
 
-#ifndef HM_PREFIX
+#ifndef HM_NAME
 #define HM JOIN(JOIN(HM_VALUE, HM_KEY), map)
 #else
-#define HM JOIN(HM_PREFIX, map)
+#define HM HM_NAME
 #endif
 
 #define HM_BUCKET JOIN(JOIN(HM_VALUE, HM_KEY), bucket)
@@ -38,7 +38,42 @@ typedef struct {
 int HM_KEY_HASH(int i) { return i; }
 #endif
 
+#if !defined(HM_KEY_FREE) && !defined(HM_VALUE_FREE)
+#define _HM_FREE_POD
+#endif
+
+#if !defined(HM_KEY_COPY) && !defined(HM_VALUE_COPY)
+#define _HM_COPY_POD
+#endif
+
+static inline void JOIN(HM_BUCKET, free)(HM_BUCKET *bucket) {
+#ifdef HM_KEY_FREE
+    HM_KEY_FREE(&bucket->key);
+#endif
+#ifdef HM_VALUE_FREE
+    HM_VALUE_FREE(&bucket->key);
+#endif
+}
+
+static inline HM_BUCKET JOIN(HM_BUCKET, copy)(HM_BUCKET *bucket) {
+    HM_BUCKET new_bucket = {.hash = bucket->hash};
+#ifdef HM_KEY_COPY
+    new_bucket.key = HM_KEY_COPY(&bucket->key);
+#else
+    new_bucket.key = bucket->key;
+#endif
+#ifdef HM_VALUE_COPY
+    HM_VALUE_COPY(&bucket->value);
+#else
+    new_bucket.value = bucket->value;
+#endif
+    return new_bucket;
+}
+
 #ifndef HM_EXTEND
+#undef _HM_FREE_POD
+#undef _HM_COPY_POD
+#undef HM_NAME
 #undef HM
 #undef HM_BUCKET
 #undef HM_KEY

@@ -32,7 +32,7 @@ static void JOIN(VEC, maybe_resize_)(VEC *vec) {
     if (vec->cap == vec->len) {
         int old_cap = vec->cap;
         vec->cap = old_cap < 8 ? 8 : old_cap * 2;
-        vec->data = realloc(vec->data, sizeof(VEC_TYPE) * vec->cap);
+        vec->data = (VEC_TYPE *)realloc(vec->data, sizeof(VEC_TYPE) * vec->cap);
     }
 }
 
@@ -40,13 +40,13 @@ void JOIN(VEC, reserve)(VEC *vec, size_t i) {
     if (vec->len + i > vec->cap) {
         vec->cap =
             min((size_t)8, (size_t)next_power_of_2((uint64_t)vec->len + i));
-        vec->data = realloc(vec->data, sizeof(VEC_TYPE) * vec->cap);
+        vec->data = (VEC_TYPE *)realloc(vec->data, sizeof(VEC_TYPE) * vec->cap);
     }
 }
 
 is_static VEC JOIN(VEC, from_ptr_copied)(VEC_TYPE *p, size_t len) {
     size_t cap = (size_t)next_power_of_2((uint64_t)len);
-    VEC_TYPE *data = malloc(sizeof(VEC_TYPE) * cap);
+    VEC_TYPE *data = (VEC_TYPE *)malloc(sizeof(VEC_TYPE) * cap);
     memcpy(data, p, sizeof(VEC_TYPE) * len);
     return (VEC){
         .len = len,
@@ -106,7 +106,7 @@ is_static size_t JOIN(VEC, len)(const VEC *vec) { return vec->len; }
 
 #ifdef VEC_TYPE_COPY
 is_static VEC JOIN(VEC, copy)(const VEC *vec) {
-    VEC_TYPE *data = malloc(sizeof(VEC_TYPE) * vec->cap);
+    VEC_TYPE *data = (VEC_TYPE *)malloc(sizeof(VEC_TYPE) * vec->cap);
     for (size_t i = 0; i < vec->len; i++) {
         data[i] = VEC_TYPE_COPY(&vec->data[i]);
     }
