@@ -319,7 +319,7 @@ void yyerror(YYLTYPE* yyllocp, __attribute__((unused)) yyscan_t scanner, parser_
 		return;
 	}
 	fprintf(stderr, "%d:%d: Parse error: %s", yyllocp->first_line, yyllocp->first_column, s);
-	uint8_t *last_error = parser_state->lexer_state.last_error.data;
+	char *last_error = parser_state->lexer_state.last_error.data;
 	if (last_error[0] != '\0') {
 		fprintf(stderr, ": %s\n", last_error);
 	} else {

@@ -1,3 +1,4 @@
+#include "hash.h"
 #include "macro_util.h"
 #include "prelude.h"
 
@@ -22,7 +23,6 @@
 #endif
 
 typedef struct {
-    int hash;
     HM_KEY key;
     HM_VALUE value;
 } HM_BUCKET;
@@ -30,10 +30,27 @@ typedef struct {
 typedef struct {
     size_t len;
     size_t cap;
+    size_t threshold;
+    hash *hashes;
     HM_BUCKET *data;
-} VEC;
+} HM;
+
+HM JOIN(HM, new)(void);
+
+void JOIN(HM, free)(HM *hm);
+
+bool JOIN(HM, insert)(HM *hm, HM_KEY k, HM_VALUE v);
+
+HM_VALUE *JOIN(HM, get_ptr)(HM *hm, const HM_KEY *k);
+
+bool JOIN(HM, contains)(HM *hm, const HM_KEY *k);
+
+bool JOIN(HM, remove)(HM *hm, const HM_KEY *k);
 
 #ifndef HM_EXTEND
+#undef _HM_FREE_COMPLEX
+#undef _HM_COPY_COMPLEX
+#undef HM_NAME
 #undef HM
 #undef HM_BUCKET
 #undef HM_KEY
@@ -42,4 +59,5 @@ typedef struct {
 #undef HM_KEY_COPY
 #undef HM_VALUE_FREE
 #undef HM_VALUE_COPY
+#undef HM_KEY_HASH
 #endif

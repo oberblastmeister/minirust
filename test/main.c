@@ -28,3 +28,4 @@ DLLEXPORT int main(int argc, char *argv[]) {
 
 // the tests must be under the main function
 #include "bits.c"
+#include "generic.c"

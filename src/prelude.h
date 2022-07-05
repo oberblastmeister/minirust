@@ -19,4 +19,11 @@
         _a < _b ? _a : _b;                                                     \
     })
 
+#define SWAP(X, Y)                                                             \
+    ({                                                                         \
+        typeof(X) _swap_tmp = (X);                                             \
+        _swap_tmp = (Y);                                                       \
+        (Y) = _swap_tmp;                                                       \
+    })
+
 #endif

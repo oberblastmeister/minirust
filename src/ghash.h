@@ -1,17 +1,30 @@
+#ifndef _LOX_GHASH_H
+#define _LOX_GHASH_H
+
 #include "hash.h"
 
+#define ghash(t)                                                               \
+    ({                                                                         \
+        hasher h = hasher_new();                                               \
+        ghash_to(&h, t);                                                       \
+        hasher_finish(h);                                                      \
+    })
+
 // clang-format off
-#define ghash(h, t) \
+#define ghash_to(h, t) \
     ({ \
         typeof(h) _h = (h); \
         typeof(t) _t = (t); \
         _Generic(_t, \
-            uint8_t: hash_uint8_t(_h, _t), \
-            uint16_t: hash_uint16_t(_h, _t), \
-            uint32_t: hash_uint32_t(_h, _t), \
-            uint64_t: hash_uint64_t(_h, _t), \
-            size_t: hash_size_t(_h, _t), \
-            bool: hash_bool(_h, _t) \
-        ); \
+            int *: hash_int, \
+            uint8_t *: hash_uint8_t, \
+            uint16_t *: hash_uint16_t, \
+            uint32_t *: hash_uint32_t, \
+            uint64_t *: hash_uint64_t, \
+            bool *: hash_bool, \
+            long *: hash_long \
+        )(_h, _t); \
     })
 // clang-format on
+
+#endif
