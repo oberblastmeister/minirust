@@ -127,6 +127,11 @@ is_static VEC_TYPE *JOIN(VEC, alloc)(VEC *vec, VEC_TYPE t) {
     return &vec->data[vec->len - 1];
 }
 
+is_static bool JOIN(VEC, eq)(VEC *v1, VEC *v2) {
+    return v1->len == v2->len &&
+           memcmp(v1->data, v2->data, sizeof(VEC_TYPE) * v1->len);
+}
+
 #ifndef VEC_EXTEND
 #undef is_static
 #undef VEC

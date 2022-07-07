@@ -80,6 +80,7 @@ HM JOIN(HM, new)() {
     return (HM){
         .len = 0,
         .cap = 0,
+        .threshold = 0,
         .hashes = NULL,
         .data = NULL,
     };
@@ -134,6 +135,7 @@ void _JOIN(HM, resize)(HM *hm, size_t new_cap) {
         .cap = new_cap,
     };
 
+    // hm->cap starts at 0, so no null dereference when lazy initialization
     for (size_t i = 0; i < hm->cap; i++) {
         if (hm->hashes[i] != 0) {
             _JOIN(HM, add_with_hash)
@@ -148,7 +150,8 @@ void _JOIN(HM, resize)(HM *hm, size_t new_cap) {
 }
 
 void _JOIN(HM, maybe_resize)(HM *hm) {
-    if (hm->len == hm->cap) {
+    // >= is important because len and threshold both start at 0 at creation
+    if (hm->len >= hm->threshold) {
         _JOIN(HM, resize)(hm, min((size_t)8, hm->cap * 2));
     }
 }
@@ -188,6 +191,8 @@ bool JOIN(HM, insert)(HM *hm, HM_KEY k, HM_VALUE v) {
 }
 
 static inline size_t _JOIN(HM, get_index)(HM *hm, const HM_KEY *k) {
+    // make sure that we don't do null dereference because of lazy
+    // initialization
     if (hm->cap == 0) {
         return (size_t)-1;
     }
@@ -241,10 +246,10 @@ bool JOIN(HM, remove)(HM *hm, const HM_KEY *k) {
     size_t cap = hm->cap;
     size_t mask = cap - 1;
     size_t i = _JOIN(HM, get_index)(hm, k);
-    size_t j = (i + 1) & mask;
     if (i == (size_t)-1) {
         return false;
     }
+    size_t j = (i + 1) & mask;
     JOIN(HM_BUCKET, free)(&hm->data[i]);
     while (true) {
         hash h_at = hm->hashes[j];

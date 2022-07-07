@@ -13,10 +13,10 @@ string string_new(char *s);
 
 string string_new_n(char *s, size_t n);
 
-void string_free(string *string_vec);
+void string_free(string *s);
 
-void string_clear(string *string);
+void string_clear(string *s);
 
-string string_copy(string *string_vec);
+string string_copy(string *s);
 
 #endif

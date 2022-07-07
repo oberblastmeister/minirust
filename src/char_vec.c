@@ -14,8 +14,10 @@ string string_new_n(char *s, size_t n) {
     return char_vec_from_ptr_copied(s, n);
 }
 
-void string_free(string *string) { char_vec_free(string); }
+void string_free(string *s) { char_vec_free(s); }
 
-void string_clear(string *string) { string->len = 1; }
+void string_clear(string *s) { s->len = 1; }
 
-string string_copy(string *string) { return char_vec_copy(string); }
+string string_copy(string *s) { return char_vec_copy(s); }
+
+string string_eq(string *s1, string *s2);
