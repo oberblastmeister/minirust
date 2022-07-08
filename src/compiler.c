@@ -4,6 +4,34 @@
 #include <stdio.h>
 #include <string.h>
 
+scope scope_copy(scope *old_scope) {
+    local *anon_locals = malloc(sizeof(local) * old_scope->next_anon_id);
+    memcpy(anon_locals, old_scope->anon_locals,
+           sizeof(local) * old_scope->next_anon_id);
+    return (scope){
+        .next_anon_id = old_scope->next_anon_id,
+        .anon_locals = anon_locals,
+        .named_locals = local_map_copy(&old_scope->named_locals),
+    };
+}
+
+void scope_free(scope *scope) {
+    free(scope->anon_locals);
+    local_map_free(&scope->named_locals);
+}
+
+#define HM_KEY string
+#define HM_KEY_COPY string_copy
+#define HM_KEY_FREE string_free
+#define HM_VALUE local
+#define HM_NAME local_map
+#include "hash_map.h"
+
+#define VEC_TYPE scope
+#define VEC_TYPE_COPY scope_copy
+#define VEC_TYPE_FREE scope_free
+#include "vec.h"
+
 static chunk *current_chunk(compiler *compiler) { return &compiler->chunk; }
 
 /**

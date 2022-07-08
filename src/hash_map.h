@@ -3,6 +3,7 @@
 #include "hash.h"
 #include "macro_util.h"
 #include "prelude.h"
+#include "ptr.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -19,8 +20,8 @@
 // do this just to get better support for clangd
 // the file will already fail to compile
 #define HM_KEY int
-void dummy_int_free(int *i) {}
-int dummy_int_copy(int *i) { return *i; }
+static void dummy_int_free(int *i) {}
+static int dummy_int_copy(int *i) { return *i; }
 #define HM_KEY_FREE dummy_int_free
 #define HM_KEY_COPY dummy_int_copy
 #endif
@@ -81,8 +82,8 @@ HM JOIN(HM, new)() {
         .len = 0,
         .cap = 0,
         .threshold = 0,
-        .hashes = NULL,
-        .data = NULL,
+        .hashes = invalid_ptr(hash),
+        .data = invalid_ptr(HM_BUCKET),
     };
 }
 
@@ -263,6 +264,26 @@ bool JOIN(HM, remove)(HM *hm, const HM_KEY *k) {
         i = j;
         j = (j + 1) & mask;
     }
+}
+
+HM JOIN(HM, copy)(const HM *hm) {
+    hash *new_hashes = malloc(sizeof(hash) * hm->cap);
+    memcpy(new_hashes, hm->hashes, sizeof(hash) * hm->cap);
+    HM new_hm = {
+        .len = hm->len,
+        .cap = hm->cap,
+        .threshold = hm->threshold,
+        .hashes = new_hashes,
+        .data = malloc(sizeof(HM_BUCKET) * hm->cap),
+    };
+#ifdef _HM_COPY_COMPLEX
+    for (size_t i = 0; i < hm->cap; i++) {
+        new_hm.data[i] = JOIN(HM_BUCKET, copy)(&hm->data[i]);
+    }
+#else
+    memcpy(new_hm.data, hm->data, sizeof(HM_BUCKET) * hm->cap);
+#endif
+    return new_hm;
 }
 
 #ifndef HM_EXTEND

@@ -3,6 +3,7 @@
 
 #include "prelude.h"
 #include "types_list_x.h"
+#include "char_vec.h"
 
 #define _MAKE_SIMPLE_EQ(T)                                                     \
     static inline bool T##_eq(const T *x, const T *y) { return *x == *y; }
@@ -21,7 +22,8 @@ INT_LIKE_LIST_X
             uint8_t *: uint8_t_eq, \
             uint16_t *: uint16_t_eq, \
             uint32_t *: uint32_t_eq, \
-            uint64_t *: uint64_t_eq \
+            uint64_t *: uint64_t_eq, \
+            string *: string_eq \
         )(_x, _y); \
     })
 // clang-format on

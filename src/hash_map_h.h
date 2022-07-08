@@ -2,10 +2,10 @@
 #include "macro_util.h"
 #include "prelude.h"
 
-#ifndef HM_PREFIX
+#ifndef HM_NAME
 #define HM JOIN(JOIN(HM_VALUE, HM_KEY), map)
 #else
-#define HM JOIN(HM_PREFIX, map)
+#define HM HM_NAME
 #endif
 
 #define HM_BUCKET JOIN(JOIN(HM_VALUE, HM_KEY), bucket)
@@ -46,6 +46,8 @@ HM_VALUE *JOIN(HM, get_ptr)(HM *hm, const HM_KEY *k);
 bool JOIN(HM, contains)(HM *hm, const HM_KEY *k);
 
 bool JOIN(HM, remove)(HM *hm, const HM_KEY *k);
+
+HM JOIN(HM, copy)(const HM *hm);
 
 #ifndef HM_EXTEND
 #undef _HM_FREE_COMPLEX

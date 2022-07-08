@@ -14,7 +14,7 @@ typedef struct {
     size_t hash;
 } hasher;
 
-typedef uint64_t hash;
+typedef size_t hash;
 
 static inline void hash_size_t(hasher *h, const size_t *i) {
     // exploits wrapping multiplication of FX_CONST
@@ -41,7 +41,7 @@ INT_LIKE_LIST_X
 #undef _INT_LIST_X
 #undef INT_HASHER
 
-static inline void hash_bytes(hasher *h, const uint8_t *bytes, size_t len) {
+static inline void hash_bytes(hasher *h, const char *bytes, size_t len) {
     while (len >= sizeof(size_t)) {
         size_t i = read_size_t(bytes);
         hash_size_t(h, &i);
@@ -68,6 +68,6 @@ static inline void hash_bytes(hasher *h, const uint8_t *bytes, size_t len) {
 
 static inline hasher hasher_new(void) { return (hasher){.hash = 0}; }
 
-static inline hash hasher_finish(hasher h) { return (uint64_t)h.hash; }
+static inline hash hasher_finish(hasher h) { return (hash)h.hash; }
 
 #endif

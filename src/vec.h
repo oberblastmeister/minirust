@@ -3,6 +3,7 @@
 #include "bits.h"
 #include "macro_util.h"
 #include "prelude.h"
+#include "ptr.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -29,6 +30,11 @@ typedef struct {
 #endif
 
 static void JOIN(VEC, maybe_resize_)(VEC *vec) {
+    if (vec->cap == 0) {
+        vec->cap = 8;
+        vec->data = malloc(sizeof(VEC_TYPE) * 8);
+        return;
+    }
     if (vec->cap == vec->len) {
         int old_cap = vec->cap;
         vec->cap = old_cap < 8 ? 8 : old_cap * 2;
@@ -58,11 +64,11 @@ is_static VEC JOIN(VEC, from_ptr_copied)(VEC_TYPE *p, size_t len) {
 is_static void JOIN(VEC, init)(VEC *vec) {
     vec->len = 0;
     vec->cap = 0;
-    vec->data = NULL;
+    vec->data = invalid_ptr(VEC_TYPE);
 }
 
 is_static VEC JOIN(VEC, new)(void) {
-    return (VEC){.len = 0, .cap = 0, .data = NULL};
+    return (VEC){.len = 0, .cap = 0, .data = invalid_ptr(VEC_TYPE)};
 }
 
 is_static void JOIN(VEC, push)(VEC *vec, VEC_TYPE x) {
@@ -96,7 +102,7 @@ is_static void JOIN(VEC, clear)(VEC *vec) {
 
 is_static void JOIN(VEC, free)(VEC *vec) {
     JOIN(VEC, clear)(vec);
-    if (vec->data != NULL) {
+    if (vec->cap != 0) {
         free(vec->data);
         JOIN(VEC, init)(vec);
     }
@@ -129,7 +135,7 @@ is_static VEC_TYPE *JOIN(VEC, alloc)(VEC *vec, VEC_TYPE t) {
 
 is_static bool JOIN(VEC, eq)(VEC *v1, VEC *v2) {
     return v1->len == v2->len &&
-           memcmp(v1->data, v2->data, sizeof(VEC_TYPE) * v1->len);
+           memcmp(v1->data, v2->data, sizeof(VEC_TYPE) * v1->len) == 0;
 }
 
 #ifndef VEC_EXTEND

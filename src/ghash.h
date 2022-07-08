@@ -2,6 +2,7 @@
 #define _LOX_GHASH_H
 
 #include "hash.h"
+#include "char_vec.h"
 
 #define ghash(t)                                                               \
     ({                                                                         \
@@ -22,7 +23,8 @@
             uint32_t *: hash_uint32_t, \
             uint64_t *: hash_uint64_t, \
             bool *: hash_bool, \
-            long *: hash_long \
+            long *: hash_long, \
+            string *: string_hash \
         )(_h, _t); \
     })
 // clang-format on

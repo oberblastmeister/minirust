@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define _MAKE_READER(T)                                                        \
-    static inline T read_##T(const uint8_t *bytes) {                                 \
+    static inline T read_##T(const char *bytes) {                                 \
         T t;                                                                   \
         memcpy(&t, bytes, sizeof(T));                                          \
         return t;                                                              \

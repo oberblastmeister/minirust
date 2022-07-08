@@ -2,6 +2,7 @@
 
 #define _LOX_STRING_VEC_H
 
+#include "hash.h"
 #define VEC_TYPE char
 #include "vec_h.h"
 
@@ -18,5 +19,9 @@ void string_free(string *s);
 void string_clear(string *s);
 
 string string_copy(string *s);
+
+bool string_eq(const string *s1, const string *s2);
+
+void string_hash(hasher *h, const string *s);
 
 #endif

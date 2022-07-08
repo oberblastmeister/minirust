@@ -20,4 +20,12 @@ void string_clear(string *s) { s->len = 1; }
 
 string string_copy(string *s) { return char_vec_copy(s); }
 
-string string_eq(string *s1, string *s2);
+bool string_eq(const string *s1, const string *s2) {
+    return s1->len == s2->len && memcmp(s1->data, s2->data, s1->len - 1) == 0;
+}
+
+void string_hash(hasher *h, const string *s) {
+    // this allows prefix freedom
+    hash_size_t(h, &s->len);
+    hash_bytes(h, s->data, s->len);
+}
