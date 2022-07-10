@@ -19,7 +19,7 @@
     X(POP_N, 0, 1)                                                             \
     X(POP_N_16, 0, 1)                                                          \
     X(LOAD_LOCAL, 1, 1)                                                        \
-    X(STORE_LOCAL, -1, 1)                                                       \
+    X(STORE_LOCAL, -1, 1)                                                      \
     X(LOAD_LOCAL_16, 1, 1)                                                     \
     X(STORE_LOCAL_16, -1, 1)
 

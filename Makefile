@@ -81,6 +81,10 @@ bisonreport:
 	rm parser.xml
 	xdg-open target/parser_report.html
 
+.PHONY: bisongraph
+bisongraph:
+	bison $(PARSER_BISON) --graph=target/parser.gv
+	rm parser.tab.c
 
 # executable
 $(EXE): $(OBJS) | $(TARGET)

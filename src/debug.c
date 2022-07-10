@@ -17,7 +17,7 @@ static int simple_instruction(const char *name, int offset) {
     return offset + 1;
 }
 
-static constant_instruction(chunk *chunk, int offset) {
+static void constant_instruction(chunk *chunk, int offset) {
     uint8_t constant = uint8_t_vec_index(&chunk->instructions, offset + 1);
     printf("%4d '", constant);
     value_print(value_vec_index(&chunk->constants, constant));

@@ -73,10 +73,7 @@ interpret_result vm_run(vm *vm) {
             break;
         }
         case OP_CONST: {
-            value constant = value_vec_index(&vm->chunk.constants, *vm->ip++);
-            printf("got const: ");
-            value_print(constant);
-            printf("\n");
+            value constant = value_vec_index(&vm->chunk.constants, READ_BYTE());
             vm_push(vm, constant);
             break;
         }
@@ -113,15 +110,7 @@ interpret_result vm_run(vm *vm) {
             break;
         }
         case OP_LOAD_LOCAL: {
-            printf("0: ");
-            value_print(vm->stack[2]);
-            printf("\n");
-            printf("loading: ");
             uint8_t slot = READ_BYTE();
-            printf("slot: %d\n", slot);
-            printf("val: ");
-            value_print(vm->stack[slot]);
-            printf("\n");
             vm_push(vm, vm->stack[slot]);
             break;
         }
@@ -132,10 +121,6 @@ interpret_result vm_run(vm *vm) {
         case OP_STORE_LOCAL: {
             value v = vm_pop(vm);
             uint8_t slot = READ_BYTE();
-            printf("storing into: %d\n", slot);
-            printf("val: ");
-            value_print(v);
-            printf("\n");
             vm->stack[slot] = v;
             break;
         }

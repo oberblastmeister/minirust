@@ -86,7 +86,9 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 
 %type<decl> decl
 %type<stmt> stmt
-%type<expr> expr expr_op expr_atom expr_fun expr_call expr_if expr_control_arg expr_no_control_arg
+%type<expr> expr expr_op expr_atom expr_fun expr_call
+%type<expr> expr_if expr_control_arg expr_no_control_arg expr_block_lift
+%type<expr> expr_atom_no_block expr_op_no_block expr_no_block expr_call_no_block
 %type<if_cont> if_cont
 %type<expr_block> expr_block expr_block_internal
 %type<string_vec_value> params
@@ -102,7 +104,9 @@ decl
 ;
 	 
 stmt
-	: expr TOKEN_SEMI { $$ = (stmt){ STMT_EXPR, { .stmt_expr = ALLOC_EXPR($1) } }; }
+	: expr_no_block TOKEN_SEMI { $$ = (stmt){ STMT_EXPR, { .stmt_expr = ALLOC_EXPR($1) } }; }
+	| expr_block_lift { $$ = (stmt){ STMT_EXPR, { .stmt_expr = ALLOC_EXPR($1) } }; }
+	| stmt TOKEN_SEMI { $$ = $1; }
 	| TOKEN_LET TOKEN_IDENT TOKEN_EQ expr TOKEN_SEMI
 		{
 			$$ = (stmt) {
@@ -119,6 +123,12 @@ stmt
 
 nothing
 	: /* EMPTY */ { }
+
+expr_no_block
+	: expr_op_no_block { $$ = $1; }
+	| expr_fun { $$ = $1; }
+	| TOKEN_RETURN expr_op { $$ = (expr){ EXPR_RETURN, { .expr_return = ALLOC_EXPR($2) } }; }
+	| TOKEN_RETURN { $$ = (expr){EXPR_RETURN, { .expr_return = NULL }}; }
 
 expr
 	: expr_control_arg { $$ = $1; }
@@ -204,6 +214,23 @@ params_build
 	| params_build ',' TOKEN_IDENT { string_vec_push(&parser_state->string_vec_builder, $3); }
 ;
 
+expr_op_no_block
+	: expr_op_no_block TOKEN_PLUS expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_ADD, $3); }
+	| expr_op_no_block TOKEN_MINUS expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_SUB, $3); }
+	| expr_op_no_block TOKEN_STAR expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_MUL, $3); }
+	| expr_op_no_block TOKEN_SLASH expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_DIV, $3); }
+	| expr_op_no_block TOKEN_AND expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_AND, $3); }
+	| expr_op_no_block TOKEN_OR expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_OR, $3); }
+	| expr_op_no_block TOKEN_GT expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_GT, $3); }
+	| expr_op_no_block TOKEN_GT_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_GT_EQ, $3); }
+	| expr_op_no_block TOKEN_LT_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_LT_EQ, $3); }
+	| expr_op_no_block TOKEN_EQ_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_EQ, $3); }
+	| expr_op_no_block TOKEN_BANG_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_NEQ, $3); }
+	| TOKEN_BANG expr_op { $$ = MAKE_EXPR_UNARY(EXPR_OP_NOT, $2); }
+	| expr_atom_no_block { $$ = $1; }
+	
+;	
+
 expr_op
 	: expr_op TOKEN_PLUS expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_ADD, $3); }
 	| expr_op TOKEN_MINUS expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_SUB, $3); }
@@ -221,6 +248,10 @@ expr_op
 	
 ;	
 
+expr_block_lift
+	: expr_block { $$ = (expr) {EXPR_BLOCK, {.expr_block = $1}}; }
+; 
+
 expr_block
 	: expr_block_internal { stmt_vec_clear(&parser_state->stmt_vec_builder); $$ = $1; }
 ;
@@ -233,7 +264,12 @@ expr_block_internal
 				.last = NULL,
 			};
 		}
-	| TOKEN_LBRACE stmt_build expr TOKEN_RBRACE
+	// must use expr_no_block here to make sure there is no reduce reduce conflict
+	// TOKEN_NIL . TOKEN_LPAREN
+	// don't know whether to reduce TOKEN_NIL to expr or expr_no_block
+	// this depends on whether there is a semicolon in the future, but we don't know that
+	// we can only have one lookahead
+	| TOKEN_LBRACE stmt_build expr_no_block TOKEN_RBRACE
 		{
 			$$ = (expr_block) {
 				.stmts = stmt_vec_copy(&parser_state->stmt_vec_builder),
@@ -247,6 +283,17 @@ stmt_build
 	| stmt_build stmt { stmt_vec_push(&parser_state->stmt_vec_builder, $2); }
 ;
 
+expr_atom_no_block
+	: TOKEN_NIL { $$ = (expr){EXPR_NIL, {.expr_nil = {}}}; }
+	| TOKEN_INT { $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
+	| TOKEN_DOUBLE { $$ = (expr){ EXPR_DOUBLE, { .expr_double = $1 } }; }
+	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, { .expr_bool = true } }; }
+	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, { .expr_bool = false } }; }
+	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
+	| expr_call_no_block { $$ = $1; }
+	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, { .expr_ident = $1} }; }
+;
+
 expr_atom
 	: TOKEN_NIL { $$ = (expr){EXPR_NIL, {.expr_nil = {}}}; }
 	| TOKEN_INT { $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
@@ -254,13 +301,28 @@ expr_atom
 	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, { .expr_bool = true } }; }
 	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, { .expr_bool = false } }; }
 	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
-	| expr_block { $$ = (expr){EXPR_BLOCK, { .expr_block = $1 } }; }
 	| expr_call { $$ = $1; }
 	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, { .expr_ident = $1} }; }
+	| expr_block { $$ = (expr){EXPR_BLOCK, { .expr_block = $1 } }; }
 ;
 
 expr_call
 	: expr_atom TOKEN_LPAREN args TOKEN_RPAREN
+		{
+			$$ = (expr){
+				EXPR_CALL,
+				{
+					.expr_call = {
+						.expr_fun = ALLOC_EXPR($1),
+						.args = $3,
+					}
+				}
+			};
+		}
+;
+
+expr_call_no_block
+	: expr_atom_no_block TOKEN_LPAREN args TOKEN_RPAREN
 		{
 			$$ = (expr){
 				EXPR_CALL,
