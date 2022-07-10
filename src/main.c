@@ -4,6 +4,7 @@
 #include "io_ext.h"
 #include "lexer_wrapper.h"
 #include "memory.h"
+#include "opcode.h"
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "prelude.h"
@@ -26,6 +27,7 @@ static interpret_result interpret(char *s) {
     if (compiler.did_error) {
         return INTERPRET_COMPILE_ERROR;
     }
+    disassemble_chunk(&compiler.chunk, "repl");
     cleanup(vm_free) vm vm = vm_new(compiler.chunk);
     return vm_run(&vm);
 }

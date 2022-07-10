@@ -121,8 +121,8 @@ nothing
 	: /* EMPTY */ { }
 
 expr
-	: expr_control_arg { printf("control\n"); $$ = $1; }
-	| expr_no_control_arg { printf("no control\n"); $$ = $1; }
+	: expr_control_arg { $$ = $1; }
+	| expr_no_control_arg { $$ = $1; }
 ;
 
 expr_no_control_arg

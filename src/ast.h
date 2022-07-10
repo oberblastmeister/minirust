@@ -33,6 +33,7 @@ struct stmt {
 
 typedef struct {
     stmt_vec stmts;
+    // can be null
     expr *last;
 } expr_block;
 

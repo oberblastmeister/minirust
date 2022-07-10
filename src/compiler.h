@@ -6,9 +6,10 @@
 #include "chunk.h"
 
 #define UINT8_COUNT (UINT8_MAX + 1)
+#define UINT16_COUNT (UINT16_MAX + 1)
 
 typedef struct {
-    int id;
+    int stack_slot;
     // // may have all zero pattern
     // string name;
 } local;
@@ -20,9 +21,11 @@ typedef struct {
 #define HM_NAME local_map
 #include "hash_map_h.h"
 
+#define VEC_TYPE local
+#include "vec_h.h"
+
 typedef struct {
-    int next_anon_id;
-    local *anon_locals;
+    local_vec anon_locals;
     local_map named_locals;
 } scope;
 
@@ -38,8 +41,9 @@ void scope_free(scope *scope);
 typedef struct {
     bool did_error;
     int stack_length;
-    int next_local_id;
-    local locals[UINT8_COUNT];
+    // this also functions as giving each local a stack slot
+    // this must start at 0, and the first local must have stack slot 0
+    int local_count;
     scope_vec scopes;
     chunk chunk;
 } compiler;

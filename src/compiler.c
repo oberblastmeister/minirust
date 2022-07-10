@@ -4,19 +4,25 @@
 #include <stdio.h>
 #include <string.h>
 
-scope scope_copy(scope *old_scope) {
-    local *anon_locals = malloc(sizeof(local) * old_scope->next_anon_id);
-    memcpy(anon_locals, old_scope->anon_locals,
-           sizeof(local) * old_scope->next_anon_id);
+#define VEC_TYPE local
+#include "vec.h"
+
+static scope scope_new(void) {
     return (scope){
-        .next_anon_id = old_scope->next_anon_id,
-        .anon_locals = anon_locals,
+        .anon_locals = local_vec_new(),
+        .named_locals = local_map_new(),
+    };
+}
+
+scope scope_copy(scope *old_scope) {
+    return (scope){
+        .anon_locals = local_vec_copy(&old_scope->anon_locals),
         .named_locals = local_map_copy(&old_scope->named_locals),
     };
 }
 
 void scope_free(scope *scope) {
-    free(scope->anon_locals);
+    local_vec_free(&scope->anon_locals);
     local_map_free(&scope->named_locals);
 }
 
@@ -50,7 +56,7 @@ static void emit_byte2(compiler *compiler, uint8_t byte1, uint8_t byte2) {
     emit_byte(compiler, byte2);
 }
 
-static void emit_op(compiler *compiler, opcode op) {
+static inline void emit_op(compiler *compiler, opcode op) {
     emit_byte(compiler, (uint8_t)op);
     compiler->stack_length += op_stack_effects[op];
 }
@@ -82,6 +88,140 @@ static void emit_constant(compiler *compiler, value value) {
 
 static void todo(compiler *compiler) {
     error(compiler, "Don't know how to compile this expression yet");
+}
+
+static local compiler_get_local(compiler *compiler) {
+    return (local){.stack_slot = compiler->local_count++};
+}
+
+static void compile_stmt_let(compiler *compiler, stmt_let stmt_let) {
+    compile_expr(compiler, stmt_let.expr);
+    scope *scope = scope_vec_last(&compiler->scopes);
+    string name = stmt_let.name;
+    if (local_map_contains(&scope->named_locals, &name)) {
+        // TODO: allow shadowing
+        error(compiler, "Locals cannot be shadowed in the same scope");
+        return;
+    }
+    local_map_insert(&scope->named_locals, name, compiler_get_local(compiler));
+}
+
+static local *compile_anon_local(compiler *compiler) {
+    emit_op(compiler, OP_NIL);
+    scope *scope = scope_vec_last(&compiler->scopes);
+    local local = compiler_get_local(compiler);
+    return local_vec_alloc(&scope->anon_locals, local);
+}
+
+static void emit_store_local(compiler *compiler, int stack_slot) {
+    if (stack_slot > UINT16_COUNT) {
+        error(compiler, "Too many locals");
+        return;
+    }
+    if (stack_slot > UINT8_COUNT) {
+        emit_op(compiler, OP_STORE_LOCAL_16);
+        emit_uint_16_t(compiler, (uint16_t)stack_slot);
+        return;
+    }
+    emit_op(compiler, OP_STORE_LOCAL);
+    emit_byte(compiler, (uint8_t)stack_slot);
+}
+
+static void emit_load_local(compiler *compiler, int stack_slot) {
+    if (stack_slot > UINT16_COUNT) {
+        error(compiler, "Too many locals");
+        return;
+    }
+    if (stack_slot > UINT8_COUNT) {
+        emit_op(compiler, OP_LOAD_LOCAL_16);
+        emit_uint_16_t(compiler, (uint16_t)stack_slot);
+        return;
+    }
+    emit_op(compiler, OP_LOAD_LOCAL);
+    emit_byte(compiler, (uint8_t)stack_slot);
+}
+
+static void emit_pop_n(compiler *compiler, int n) {
+    compiler->stack_length -= n;
+    if (n > UINT16_COUNT) {
+        error(compiler, "Too many locals");
+        return;
+    }
+    if (n > UINT8_COUNT) {
+        emit_op(compiler, OP_POP_N_16);
+        emit_uint_16_t(compiler, (uint16_t)n);
+        return;
+    }
+    emit_op(compiler, OP_POP_N);
+    emit_byte(compiler, (uint8_t)n);
+}
+static void begin_scope(compiler *compiler) {
+    scope scope = scope_new();
+    scope_vec_push(&compiler->scopes, scope);
+}
+
+static void end_scope(compiler *compiler) {
+    scope scope = scope_vec_pop(&compiler->scopes);
+    // TODO: we need to account for same scope shadowing
+    size_t num_locals = scope.anon_locals.len + scope.named_locals.len;
+    emit_pop_n(compiler, num_locals);
+    scope_free(&scope);
+    compiler->local_count -= (int)num_locals;
+}
+
+static void compile_stmt_expr(compiler *compiler, expr *expr) {
+    compile_expr(compiler, expr);
+    emit_op(compiler, OP_POP);
+}
+
+static void compile_stmt(compiler *compiler, stmt stmt) {
+    switch (stmt.tag) {
+    case STMT_EXPR: {
+        compile_stmt_expr(compiler, stmt.data.stmt_expr);
+        break;
+    }
+    case STMT_LET: {
+        compile_stmt_let(compiler, stmt.data.stmt_let);
+        break;
+    }
+    }
+}
+
+static void compile_expr_block(compiler *compiler, expr_block expr_block) {
+    printf("hello\n");
+    if (expr_block.last != NULL) {
+        local *anon_local = compile_anon_local(compiler);
+        printf("local slot: %d\n", anon_local->stack_slot);
+        begin_scope(compiler);
+        for (size_t i = 0; i < expr_block.stmts.len; i++) {
+            compile_stmt(compiler, expr_block.stmts.data[i]);
+        }
+        compile_expr(compiler, expr_block.last);
+        emit_store_local(compiler, anon_local->stack_slot);
+        end_scope(compiler);
+        emit_load_local(compiler, anon_local->stack_slot);
+    } else {
+        begin_scope(compiler);
+        for (size_t i = 0; i < expr_block.stmts.len; i++) {
+            compile_stmt(compiler, expr_block.stmts.data[i]);
+        }
+        end_scope(compiler);
+        emit_op(compiler, OP_NIL);
+    }
+}
+
+/**
+ * @return The pointer to the local. May be NULL.
+ */
+static local *resolve_local(compiler *compiler, string *name) {
+    for (size_t i = compiler->scopes.len; i-- > 0;) {
+        scope *scope = &compiler->scopes.data[i];
+        local *local = local_map_get_ptr(&scope->named_locals, name);
+        if (local != NULL) {
+            return local;
+        }
+    }
+    return NULL;
 }
 
 static void compile_bin_expr(compiler *compiler, expr_bin expr_bin) {
@@ -121,6 +261,19 @@ void compile_expr(compiler *compiler, expr *expr) {
         }
         break;
     }
+    case EXPR_IDENT: {
+        local *local = resolve_local(compiler, &expr->data.expr_ident);
+        if (local == NULL) {
+            error(compiler, "Could not resolve variable");
+            break;
+        }
+        emit_load_local(compiler, local->stack_slot);
+        break;
+    }
+    case EXPR_BLOCK: {
+        compile_expr_block(compiler, expr->data.expr_block);
+        break;
+    }
     default: {
         todo(compiler);
         break;
@@ -137,9 +290,14 @@ void compile_return(compiler *compiler, expr *expr) {
 }
 
 compiler compiler_new(void) {
+    scope_vec scopes = scope_vec_new();
+    // initial scope
+    scope_vec_push(&scopes, scope_new());
     return (compiler){
         .did_error = false,
         .stack_length = 0,
+        .local_count = 0,
+        .scopes = scopes,
         .chunk = chunk_new(),
     };
 }

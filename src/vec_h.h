@@ -31,7 +31,7 @@ VEC JOIN(VEC, from_ptr_copied)(VEC_TYPE *p, size_t len);
 
 void JOIN(VEC, push)(VEC *vec, VEC_TYPE x);
 
-VEC_TYPE JOIN(VEC, last)(const VEC *vec);
+VEC_TYPE *JOIN(VEC, last)(const VEC *vec);
 
 VEC_TYPE JOIN(VEC, pop)(VEC *vec);
 

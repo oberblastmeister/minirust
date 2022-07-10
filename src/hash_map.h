@@ -174,6 +174,7 @@ bool JOIN(HM, insert)(HM *hm, HM_KEY k, HM_VALUE v) {
         if (h_at == 0) {
             hm->hashes[i] = h;
             hm->data[i] = bucket;
+            hm->len++;
             return false;
         }
         if (h_at == h && geq(&hm->data[i].key, &bucket.key)) {
@@ -250,6 +251,7 @@ bool JOIN(HM, remove)(HM *hm, const HM_KEY *k) {
     if (i == (size_t)-1) {
         return false;
     }
+    hm->len--;
     size_t j = (i + 1) & mask;
     JOIN(HM_BUCKET, free)(&hm->data[i]);
     while (true) {

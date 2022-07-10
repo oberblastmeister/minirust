@@ -77,8 +77,8 @@ is_static void JOIN(VEC, push)(VEC *vec, VEC_TYPE x) {
     vec->len++;
 }
 
-is_static inline VEC_TYPE JOIN(VEC, last)(const VEC *vec) {
-    return vec->data[vec->len - 1];
+is_static VEC_TYPE *JOIN(VEC, last)(const VEC *vec) {
+    return &vec->data[vec->len - 1];
 }
 
 is_static VEC_TYPE JOIN(VEC, pop)(VEC *vec) {

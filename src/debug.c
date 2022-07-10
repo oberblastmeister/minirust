@@ -17,35 +17,42 @@ static int simple_instruction(const char *name, int offset) {
     return offset + 1;
 }
 
-static int constant_instruction(const char *name, chunk *chunk, int offset) {
+static constant_instruction(chunk *chunk, int offset) {
     uint8_t constant = uint8_t_vec_index(&chunk->instructions, offset + 1);
-    printf("%-16s %4d '", name, constant);
+    printf("%4d '", constant);
     value_print(value_vec_index(&chunk->constants, constant));
-    printf("'\n");
-    return offset + 2;
+    printf("'");
 }
 
 int disassemble_instruction(chunk *chunk, int offset) {
     printf("%04d ", offset);
 
     uint8_t instruction = uint8_t_vec_index(&chunk->instructions, offset);
-    switch (instruction) {
-    case OP_CONST:
-        return constant_instruction("OP_CONST", chunk, offset);
-    case OP_ADD:
-        return simple_instruction("OP_ADD", offset);
-    case OP_SUB:
-        return simple_instruction("OP_SUB", offset);
-    case OP_MUL:
-        return simple_instruction("OP_MUL", offset);
-    case OP_DIV:
-        return simple_instruction("OP_DIV", offset);
-    case OP_NEG:
-        return simple_instruction("OP_NEG", offset);
-    case OP_RET:
-        return simple_instruction("OP_RET", offset);
-    default:
-        printf("Unknown opcode %d\n", instruction);
+    if (instruction < op_amount) {
+        printf("%-16s", op_names[instruction]);
+    } else {
+        printf("<unknown>");
         return offset + 1;
     }
+    int args = op_args[instruction];
+    switch (instruction) {
+    case OP_CONST: {
+        constant_instruction(chunk, offset);
+        break;
+    }
+    case OP_POP_N: {
+        break;
+    }
+    case OP_LOAD_LOCAL: {
+        break;
+    }
+    case OP_STORE_LOCAL: {
+        break;
+    }
+    default: {
+        break;
+    }
+    }
+    printf("\n");
+    return offset + 1 + args;
 }
