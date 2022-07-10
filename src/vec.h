@@ -45,7 +45,7 @@ static void JOIN(VEC, maybe_resize_)(VEC *vec) {
 void JOIN(VEC, reserve)(VEC *vec, size_t i) {
     if (vec->len + i > vec->cap) {
         vec->cap =
-            min((size_t)8, (size_t)next_power_of_2((uint64_t)vec->len + i));
+            max((size_t)8, (size_t)next_power_of_2((uint64_t)vec->len + i));
         vec->data = (VEC_TYPE *)realloc(vec->data, sizeof(VEC_TYPE) * vec->cap);
     }
 }

@@ -93,12 +93,10 @@ class { return TOKEN_CLASS; }
 super { return TOKEN_SUPER; }
 this { return TOKEN_THIS; }
 {DIGIT}+"."{DIGIT}+ {
-    printf("got double: %s\n", yytext);
     yylval->double_value = strtod(yytext, NULL);
     return TOKEN_DOUBLE;
 }
 {DIGIT}+ {
-    printf("token int\n");
     yylval->int_value = atoi(yytext);
     return TOKEN_INT;
 }

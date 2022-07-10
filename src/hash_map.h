@@ -144,8 +144,12 @@ void _JOIN(HM, resize)(HM *hm, size_t new_cap) {
         }
     }
 
-    free(hm->hashes);
-    free(hm->data);
+    // account for lazy initialization,
+    // don't free if previous cap was 0
+    if (hm->cap != 0) {
+        free(hm->hashes);
+        free(hm->data);
+    }
 
     *hm = new_hm;
 }
@@ -153,7 +157,7 @@ void _JOIN(HM, resize)(HM *hm, size_t new_cap) {
 void _JOIN(HM, maybe_resize)(HM *hm) {
     // >= is important because len and threshold both start at 0 at creation
     if (hm->len >= hm->threshold) {
-        _JOIN(HM, resize)(hm, min((size_t)8, hm->cap * 2));
+        _JOIN(HM, resize)(hm, max((size_t)8, hm->cap * 2));
     }
 }
 
@@ -196,6 +200,7 @@ static inline size_t _JOIN(HM, get_index)(HM *hm, const HM_KEY *k) {
     // make sure that we don't do null dereference because of lazy
     // initialization
     if (hm->cap == 0) {
+        printf("cap zero\n");
         return (size_t)-1;
     }
 
@@ -211,9 +216,11 @@ static inline size_t _JOIN(HM, get_index)(HM *hm, const HM_KEY *k) {
         }
         int dist_at = (i + cap - (h_at & mask)) & mask;
         if (dist > dist_at) {
+            printf("dist greater\n");
             return (size_t)-1;
         }
         if (h_at == h && geq(&hm->data[i].key, k)) {
+            printf("found\n");
             return i;
         }
         i = (i + 1) & mask;
@@ -226,6 +233,7 @@ static inline size_t _JOIN(HM, get_index)(HM *hm, const HM_KEY *k) {
  * to the associated value.
  */
 HM_VALUE *JOIN(HM, get_ptr)(HM *hm, const HM_KEY *k) {
+    printf("getting\n");
     size_t i = _JOIN(HM, get_index)(hm, k);
     if (i == (size_t)-1) {
         return NULL;

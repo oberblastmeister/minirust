@@ -90,7 +90,7 @@ static void todo(compiler *compiler) {
     error(compiler, "Don't know how to compile this expression yet");
 }
 
-static local compiler_get_local(compiler *compiler) {
+static local create_local(compiler *compiler) {
     return (local){.stack_slot = compiler->local_count++};
 }
 
@@ -103,13 +103,13 @@ static void compile_stmt_let(compiler *compiler, stmt_let stmt_let) {
         error(compiler, "Locals cannot be shadowed in the same scope");
         return;
     }
-    local_map_insert(&scope->named_locals, name, compiler_get_local(compiler));
+    local_map_insert(&scope->named_locals, name, create_local(compiler));
 }
 
 static local *compile_anon_local(compiler *compiler) {
     emit_op(compiler, OP_NIL);
     scope *scope = scope_vec_last(&compiler->scopes);
-    local local = compiler_get_local(compiler);
+    local local = create_local(compiler);
     return local_vec_alloc(&scope->anon_locals, local);
 }
 
@@ -128,6 +128,7 @@ static void emit_store_local(compiler *compiler, int stack_slot) {
 }
 
 static void emit_load_local(compiler *compiler, int stack_slot) {
+    printf("load: %d\n", stack_slot);
     if (stack_slot > UINT16_COUNT) {
         error(compiler, "Too many locals");
         return;
@@ -142,6 +143,7 @@ static void emit_load_local(compiler *compiler, int stack_slot) {
 }
 
 static void emit_pop_n(compiler *compiler, int n) {
+    printf("popn: %d\n", n);
     compiler->stack_length -= n;
     if (n > UINT16_COUNT) {
         error(compiler, "Too many locals");
@@ -188,10 +190,8 @@ static void compile_stmt(compiler *compiler, stmt stmt) {
 }
 
 static void compile_expr_block(compiler *compiler, expr_block expr_block) {
-    printf("hello\n");
     if (expr_block.last != NULL) {
         local *anon_local = compile_anon_local(compiler);
-        printf("local slot: %d\n", anon_local->stack_slot);
         begin_scope(compiler);
         for (size_t i = 0; i < expr_block.stmts.len; i++) {
             compile_stmt(compiler, expr_block.stmts.data[i]);

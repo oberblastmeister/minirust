@@ -7,7 +7,9 @@
 #include <stdio.h>
 
 vm vm_new(chunk chunk) {
-    vm vm = {.chunk = chunk, .ip = chunk.instructions.data};
+    vm vm = {.chunk = chunk,
+             .ip = chunk.instructions.data,
+             .stack = calloc(STACK_MAX, sizeof(value))};
     vm.stack_top = vm.stack;
     return vm;
 }
@@ -71,8 +73,10 @@ interpret_result vm_run(vm *vm) {
             break;
         }
         case OP_CONST: {
-            printf("got const\n");
             value constant = value_vec_index(&vm->chunk.constants, *vm->ip++);
+            printf("got const: ");
+            value_print(constant);
+            printf("\n");
             vm_push(vm, constant);
             break;
         }
@@ -109,7 +113,16 @@ interpret_result vm_run(vm *vm) {
             break;
         }
         case OP_LOAD_LOCAL: {
-            vm_push(vm, vm->stack[READ_BYTE()]);
+            printf("0: ");
+            value_print(vm->stack[2]);
+            printf("\n");
+            printf("loading: ");
+            uint8_t slot = READ_BYTE();
+            printf("slot: %d\n", slot);
+            printf("val: ");
+            value_print(vm->stack[slot]);
+            printf("\n");
+            vm_push(vm, vm->stack[slot]);
             break;
         }
         case OP_LOAD_LOCAL_16: {
@@ -117,11 +130,17 @@ interpret_result vm_run(vm *vm) {
             break;
         }
         case OP_STORE_LOCAL: {
-            vm->stack[READ_BYTE()] = vm_peek(vm, 0);
+            value v = vm_pop(vm);
+            uint8_t slot = READ_BYTE();
+            printf("storing into: %d\n", slot);
+            printf("val: ");
+            value_print(v);
+            printf("\n");
+            vm->stack[slot] = v;
             break;
         }
         case OP_STORE_LOCAL_16: {
-            vm->stack[READ_T(uint16_t)] = vm_peek(vm, 0);
+            vm->stack[READ_T(uint16_t)] = vm_pop(vm);
             break;
         }
         case OP_POP: {

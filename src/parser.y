@@ -217,7 +217,7 @@ expr_op
 	| expr_op TOKEN_EQ_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_EQ, $3); }
 	| expr_op TOKEN_BANG_EQ expr_op { $$ = MAKE_EXPR_BIN($1, EXPR_OP_NEQ, $3); }
 	| TOKEN_BANG expr_op { $$ = MAKE_EXPR_UNARY(EXPR_OP_NOT, $2); }
-	| expr_atom { printf("atom\n"); $$ = $1; }
+	| expr_atom { $$ = $1; }
 	
 ;	
 
@@ -249,14 +249,14 @@ stmt_build
 
 expr_atom
 	: TOKEN_NIL { $$ = (expr){EXPR_NIL, {.expr_nil = {}}}; }
-	| TOKEN_INT { printf("got int\n"); $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
-	| TOKEN_DOUBLE { printf("got int\n"); $$ = (expr){ EXPR_DOUBLE, { .expr_double = $1 } }; }
+	| TOKEN_INT { $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
+	| TOKEN_DOUBLE { $$ = (expr){ EXPR_DOUBLE, { .expr_double = $1 } }; }
 	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, { .expr_bool = true } }; }
 	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, { .expr_bool = false } }; }
 	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
 	| expr_block { $$ = (expr){EXPR_BLOCK, { .expr_block = $1 } }; }
 	| expr_call { $$ = $1; }
-	| TOKEN_IDENT { printf("got ident\n"); $$ = (expr){EXPR_IDENT, { .expr_ident = $1} }; }
+	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, { .expr_ident = $1} }; }
 ;
 
 expr_call
