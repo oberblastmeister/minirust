@@ -47,6 +47,10 @@ void JOIN(VEC, clear)(VEC *vec);
 
 VEC_TYPE *JOIN(VEC, alloc)(VEC *vec, VEC_TYPE t);
 
+VEC_TYPE *JOIN(VEC, get_ptr)(VEC *vec, int i);
+
+VEC_TYPE *JOIN(VEC, next_ptr)(VEC *vec);
+
 #ifndef VEC_EXTEND
 #undef VEC
 #undef VEC_TYPE

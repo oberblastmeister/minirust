@@ -126,7 +126,9 @@ is_static VEC JOIN(VEC, copy)(const VEC *vec) {
 }
 #endif
 
-is_static VEC_TYPE *JOIN(VEC, ptr_at)(VEC *vec, int i) { return &vec->data[i]; }
+is_static VEC_TYPE *JOIN(VEC, get_ptr)(VEC *vec, int i) {
+    return &vec->data[i];
+}
 
 is_static VEC_TYPE *JOIN(VEC, alloc)(VEC *vec, VEC_TYPE t) {
     JOIN(VEC, push)(vec, t);
@@ -136,6 +138,10 @@ is_static VEC_TYPE *JOIN(VEC, alloc)(VEC *vec, VEC_TYPE t) {
 is_static bool JOIN(VEC, eq)(VEC *v1, VEC *v2) {
     return v1->len == v2->len &&
            memcmp(v1->data, v2->data, sizeof(VEC_TYPE) * v1->len) == 0;
+}
+
+is_static VEC_TYPE *JOIN(VEC, next_ptr)(VEC *vec) {
+    return &vec->data[vec->len];
 }
 
 #ifndef VEC_EXTEND
