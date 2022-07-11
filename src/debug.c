@@ -1,5 +1,6 @@
 #include "debug.h"
 #include "opcode.h"
+#include "string.h"
 #include "uint8_t_vec.h"
 #include "value.h"
 #include <stdio.h>
@@ -24,6 +25,25 @@ static void constant_instruction(chunk *chunk, int offset) {
     printf("'");
 }
 
+static int read_to_int(uint8_t *p, int n) {
+    if (n == 1) {
+        uint8_t res;
+        memcpy(&res, p, 1);
+        return (int)res;
+    } else if (n == 2) {
+        uint16_t res;
+        memcpy(&res, p, 2);
+        return (int)res;
+    } else if (n == 4) {
+        uint32_t res;
+        memcpy(&res, p, 4);
+        return (int)res;
+    } else {
+        printf("Bytes must be multiple of two\n");
+        return 0;
+    }
+}
+
 int disassemble_instruction(chunk *chunk, int offset) {
     printf("%04d ", offset);
 
@@ -34,25 +54,22 @@ int disassemble_instruction(chunk *chunk, int offset) {
         printf("<unknown>");
         return offset + 1;
     }
-    int args = op_args[instruction];
+    int arg_bytes = op_arg_bytes[instruction];
     switch (instruction) {
     case OP_CONST: {
         constant_instruction(chunk, offset);
         break;
     }
-    case OP_POP_N: {
-        break;
-    }
-    case OP_LOAD_LOCAL: {
-        break;
-    }
-    case OP_STORE_LOCAL: {
-        break;
-    }
     default: {
+        if (arg_bytes > 0) {
+            int arg = read_to_int(
+                uint8_t_vec_get_ptr(&chunk->instructions, offset + 1),
+                arg_bytes);
+            printf("%4d", arg);
+        }
         break;
     }
     }
     printf("\n");
-    return offset + 1 + args;
+    return offset + 1 + arg_bytes;
 }

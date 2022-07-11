@@ -1,6 +1,7 @@
 #include "compiler.h"
 #include "ast.h"
 #include "opcode.h"
+#include "stdarg.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -73,17 +74,13 @@ static void error(compiler *compiler, char *s) {
     fputs("\n", stderr);
 }
 
-static uint8_t add_constant(compiler *compiler, value value) {
+static int add_constant(compiler *compiler, value value) {
     int constant = chunk_add_constant(current_chunk(compiler), value);
     if (constant > UINT8_MAX) {
         error(compiler, "Too many constants in one chunk.");
         return 0;
     }
-    return (uint8_t)constant;
-}
-
-static void emit_constant(compiler *compiler, value value) {
-    emit_byte2(compiler, OP_CONST, add_constant(compiler, value));
+    return constant;
 }
 
 static void todo(compiler *compiler) {
@@ -113,50 +110,40 @@ static local *compile_anon_local(compiler *compiler) {
     return local_vec_alloc(&scope->anon_locals, local);
 }
 
-static void emit_store_local(compiler *compiler, int stack_slot) {
-    if (stack_slot > UINT16_COUNT) {
-        error(compiler, "Too many locals");
-        return;
+#define EMIT_VAR_SIZED_OPCODE(compiler, op, arg, error_msg)                    \
+    {                                                                          \
+        if (arg > UINT16_COUNT) {                                              \
+            error(compiler, error_msg);                                        \
+            return;                                                            \
+        }                                                                      \
+        if (arg > UINT8_COUNT) {                                               \
+            emit_op(compiler, op##_16);                                        \
+            emit_uint_16_t(compiler, (uint16_t)arg);                           \
+            return;                                                            \
+        }                                                                      \
+        emit_op(compiler, op);                                                 \
+        emit_byte(compiler, (uint8_t)arg);                                     \
     }
-    if (stack_slot > UINT8_COUNT) {
-        emit_op(compiler, OP_STORE_LOCAL_16);
-        emit_uint_16_t(compiler, (uint16_t)stack_slot);
-        return;
-    }
-    emit_op(compiler, OP_STORE_LOCAL);
-    emit_byte(compiler, (uint8_t)stack_slot);
-}
 
 static void emit_load_local(compiler *compiler, int stack_slot) {
-    printf("load: %d\n", stack_slot);
-    if (stack_slot > UINT16_COUNT) {
-        error(compiler, "Too many locals");
-        return;
-    }
-    if (stack_slot > UINT8_COUNT) {
-        emit_op(compiler, OP_LOAD_LOCAL_16);
-        emit_uint_16_t(compiler, (uint16_t)stack_slot);
-        return;
-    }
-    emit_op(compiler, OP_LOAD_LOCAL);
-    emit_byte(compiler, (uint8_t)stack_slot);
+    EMIT_VAR_SIZED_OPCODE(compiler, OP_LOAD_LOCAL, stack_slot,
+                          "Too many locals");
+}
+
+static void emit_store_local(compiler *compiler, int stack_slot) {
+    EMIT_VAR_SIZED_OPCODE(compiler, OP_STORE_LOCAL, stack_slot,
+                          "Too many locals");
 }
 
 static void emit_pop_n(compiler *compiler, int n) {
-    printf("popn: %d\n", n);
-    compiler->stack_length -= n;
-    if (n > UINT16_COUNT) {
-        error(compiler, "Too many locals");
-        return;
-    }
-    if (n > UINT8_COUNT) {
-        emit_op(compiler, OP_POP_N_16);
-        emit_uint_16_t(compiler, (uint16_t)n);
-        return;
-    }
-    emit_op(compiler, OP_POP_N);
-    emit_byte(compiler, (uint8_t)n);
+    EMIT_VAR_SIZED_OPCODE(compiler, OP_POP_N, n, "Too many locals to pop");
 }
+
+static void emit_constant(compiler *compiler, value value) {
+    int i = add_constant(compiler, value);
+    EMIT_VAR_SIZED_OPCODE(compiler, OP_CONST, i, "Too many constants");
+}
+
 static void begin_scope(compiler *compiler) {
     scope scope = scope_new();
     scope_vec_push(&compiler->scopes, scope);

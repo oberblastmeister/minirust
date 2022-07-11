@@ -6,7 +6,7 @@ const int op_stack_effects[] = {
 #undef X
 };
 
-const int op_args[] = {
+const int op_arg_bytes[] = {
 #define X(_, __, args) args,
     OPCODE_LIST_X
 #undef X
