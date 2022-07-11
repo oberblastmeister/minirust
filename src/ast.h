@@ -1,8 +1,8 @@
 #ifndef _LOX_AST_H
 #define _LOX_AST_H
 
-#include "memory.h"
 #include "char_vec.h"
+#include "memory.h"
 #include "string_vec.h"
 #include "token_wrapper.h"
 #include "value.h"
@@ -32,7 +32,8 @@ struct stmt {
 #include "vec_h.h"
 
 typedef struct {
-    stmt_vec stmts;
+    stmt *stmts;
+    int stmts_len;
     // can be null
     expr *last;
 } expr_block;
@@ -109,16 +110,19 @@ typedef struct {
 } expr_loop;
 
 typedef struct {
-    string_vec params;
+    string *params;
+    int params_len;
     expr_block body;
 } expr_fun;
 
 typedef struct {
     expr *expr_fun;
-    expr_vec args;
+    expr *args;
+    int args_len;
 } expr_call;
 
-typedef struct {} expr_nil;
+typedef struct {
+} expr_nil;
 struct expr {
     enum {
         EXPR_NIL,
@@ -173,7 +177,9 @@ typedef struct {
 
 typedef struct {
     expr_vec expr_arena;
+    stmt_vec stmt_arena;
     if_cont_vec if_cont_arena;
+    string_vec string_arena;
 } ast_arena;
 
 ast_arena ast_arena_new(void);

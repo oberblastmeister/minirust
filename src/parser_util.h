@@ -18,5 +18,3 @@
                  .op = (o),                                                    \
              }},                                                               \
     }
-
-// #define PARSER_TYPE(t) typedef  

@@ -13,14 +13,19 @@
 #define VEC_TYPE if_cont
 #include "vec.h"
 
+#include "string_vec.h"
+
 ast_arena ast_arena_new(void) {
     return (ast_arena){
-        .expr_arena = expr_vec_new(),
-        .if_cont_arena = if_cont_vec_new(),
+        expr_vec_new(),
+        stmt_vec_new(),
+        if_cont_vec_new(),
+        string_vec_new(),
     };
 }
 
 void ast_arena_free(ast_arena *ast_arena) {
     expr_vec_free(&ast_arena->expr_arena);
+    stmt_vec_free(&ast_arena->stmt_arena);
     if_cont_vec_free(&ast_arena->if_cont_arena);
 }

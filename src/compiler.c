@@ -180,8 +180,8 @@ static void compile_expr_block(compiler *compiler, expr_block expr_block) {
     if (expr_block.last != NULL) {
         local *anon_local = compile_anon_local(compiler);
         begin_scope(compiler);
-        for (size_t i = 0; i < expr_block.stmts.len; i++) {
-            compile_stmt(compiler, expr_block.stmts.data[i]);
+        for (int i = 0; i < expr_block.stmts_len; i++) {
+            compile_stmt(compiler, expr_block.stmts[i]);
         }
         compile_expr(compiler, expr_block.last);
         emit_store_local(compiler, anon_local->stack_slot);
@@ -189,8 +189,8 @@ static void compile_expr_block(compiler *compiler, expr_block expr_block) {
         emit_load_local(compiler, anon_local->stack_slot);
     } else {
         begin_scope(compiler);
-        for (size_t i = 0; i < expr_block.stmts.len; i++) {
-            compile_stmt(compiler, expr_block.stmts.data[i]);
+        for (int i = 0; i < expr_block.stmts_len; i++) {
+            compile_stmt(compiler, expr_block.stmts[i]);
         }
         end_scope(compiler);
         emit_op(compiler, OP_NIL);

@@ -1,7 +1,9 @@
 // based on https://stackoverflow.com/questions/48850242/thread-safe-reentrant-bison-flex
 
+%define parse.trace true
 %define parse.error detailed
 %define api.pure full
+%define lr.type ielr
 %locations
 // parameter for both the parser and lexer
 %param { yyscan_t scanner }
@@ -37,6 +39,9 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 	string_vec string_vec_value;
 	expr expr;
 	stmt stmt;
+	expr *next_arena_expr;
+	stmt *next_arena_stmt;
+	string *next_arena_string;
 	decl decl;
 	expr_block expr_block;
 	expr_vec expr_vec;
@@ -74,7 +79,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %destructor { string_free(&$$); } <string_value>
 
 // precedence
-%left TOKEN_RETURN
+%precedence TOKEN_RETURN
 %nonassoc TOKEN_EQ_EQ TOKEN_BANG_EQ
 %nonassoc TOKEN_GT TOKEN_GT_EQ
 %nonassoc TOKEN_LT TOKEN_LT_EQ
@@ -82,17 +87,19 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %left TOKEN_AND
 %left TOKEN_PLUS TOKEN_MINUS
 %left TOKEN_STAR TOKEN_SLASH
-%left TOKEN_BANG
+%precedence TOKEN_BANG
 
 %type<decl> decl
 %type<stmt> stmt
-%type<expr> expr expr_op expr_atom expr_fun expr_call
+%type<expr> expr expr_op expr_atom expr_fun expr_call simple lit
 %type<expr> expr_if expr_control_arg expr_no_control_arg expr_block_lift
 %type<expr> expr_atom_no_block expr_op_no_block expr_no_block expr_call_no_block
 %type<if_cont> if_cont
-%type<expr_block> expr_block expr_block_internal
-%type<string_vec_value> params
-%type<expr_vec> args
+%type<expr_block> expr_block
+%type<next_arena_expr> next_arena_expr
+%type<next_arena_stmt> next_arena_stmt
+%type<next_arena_string> next_arena_string
+%type<int_value> stmt_len params_len params_len_internal args_len_internal args_len 
 
 %start decl stmt expr expr_atom expr_block
 %start expr_fun nothing
@@ -122,7 +129,7 @@ stmt
 ;
 
 nothing
-	: /* EMPTY */ { }
+	: %empty { }
 
 expr_no_block
 	: expr_op_no_block { $$ = $1; }
@@ -167,7 +174,7 @@ expr_if
 ;
 
 if_cont
-	: /* empty */ { $$ = (if_cont){IF_CONT_NONE, {.cont_none = { } }}; }
+	: %empty { $$ = (if_cont){IF_CONT_NONE, {.cont_none = { } }}; }
 	| TOKEN_ELSE expr_block { $$ = (if_cont){IF_CONT_ELSE, {.cont_else = $2} }; }
 	| TOKEN_ELSE TOKEN_IF expr_no_control_arg expr_block if_cont	
 		{
@@ -185,33 +192,28 @@ if_cont
 ;
 
 expr_fun
-	: TOKEN_FUN TOKEN_LPAREN params TOKEN_RPAREN expr_block
+	: next_arena_string TOKEN_FUN params_len expr_block
 		{
 			$$ = (expr){
 				EXPR_FUN,
 				{
 					.expr_fun = {
-						.params = $3,
-						.body = $5,
+						.params = $1,
+						.params_len = $3,
+						.body = $4,
 					}
 				}
 			};
 		}
 ;
 
-params
-	: /* empty */ { }
-	| params_build maybe_comma
-		{
-			string_vec res = string_vec_copy(&parser_state->string_vec_builder);
-			string_vec_clear(&parser_state->string_vec_builder);
-			$$ = res;
-		}
-;
+params_len
+	: TOKEN_LPAREN TOKEN_RPAREN { $$ = 0; }
+	| TOKEN_LPAREN params_len_internal maybe_comma TOKEN_RPAREN { $$ = $2; }
 
-params_build
-	: TOKEN_IDENT { string_vec_push(&parser_state->string_vec_builder, $1); }
-	| params_build ',' TOKEN_IDENT { string_vec_push(&parser_state->string_vec_builder, $3); }
+params_len_internal
+	: TOKEN_IDENT { string_vec_push(&parser_state->ast_arena.string_arena, $1); $$ = 1; }
+	| params_len_internal TOKEN_COMMA TOKEN_IDENT { string_vec_push(&parser_state->ast_arena.string_arena, $3); $$ = $1 + 1; }
 ;
 
 expr_op_no_block
@@ -252,15 +254,22 @@ expr_block_lift
 	: expr_block { $$ = (expr) {EXPR_BLOCK, {.expr_block = $1}}; }
 ; 
 
-expr_block
-	: expr_block_internal { stmt_vec_clear(&parser_state->stmt_vec_builder); $$ = $1; }
-;
+next_arena_expr
+	: %empty { $$ = expr_vec_next_ptr(&parser_state->ast_arena.expr_arena); }
 
-expr_block_internal
-	: TOKEN_LBRACE stmt_build TOKEN_RBRACE
+next_arena_stmt
+	: %empty { $$ = stmt_vec_next_ptr(&parser_state->ast_arena.stmt_arena); }
+	
+next_arena_string
+	: %empty { $$ = string_vec_next_ptr(&parser_state->ast_arena.string_arena); }
+
+
+expr_block
+	: next_arena_stmt TOKEN_LBRACE stmt_len TOKEN_RBRACE
 		{
 			$$ = (expr_block) {
-				.stmts = stmt_vec_copy(&parser_state->stmt_vec_builder),
+				.stmts = $1,
+				.stmts_len = $3,
 				.last = NULL,
 			};
 		}
@@ -269,52 +278,42 @@ expr_block_internal
 	// don't know whether to reduce TOKEN_NIL to expr or expr_no_block
 	// this depends on whether there is a semicolon in the future, but we don't know that
 	// we can only have one lookahead
-	| TOKEN_LBRACE stmt_build expr_no_block TOKEN_RBRACE
+	| next_arena_stmt TOKEN_LBRACE stmt_len expr_no_block TOKEN_RBRACE
 		{
 			$$ = (expr_block) {
-				.stmts = stmt_vec_copy(&parser_state->stmt_vec_builder),
-				.last = ALLOC_EXPR($3),
+				.stmts = $1,
+				.stmts_len = $3,
+				.last = ALLOC_EXPR($4),
 			};
 		}
 ;
 	
-stmt_build
-	: /* empty */ { }
-	| stmt_build stmt { stmt_vec_push(&parser_state->stmt_vec_builder, $2); }
+stmt_len
+	: %empty { $$ = 0; }
+	| stmt_len stmt { stmt_vec_push(&parser_state->ast_arena.stmt_arena, $2); $$ = $1 + 1; }
 ;
 
 expr_atom_no_block
-	: TOKEN_NIL { $$ = (expr){EXPR_NIL, {.expr_nil = {}}}; }
-	| TOKEN_INT { $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
-	| TOKEN_DOUBLE { $$ = (expr){ EXPR_DOUBLE, { .expr_double = $1 } }; }
-	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, { .expr_bool = true } }; }
-	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, { .expr_bool = false } }; }
-	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
+	: simple { $$ = $1; }
 	| expr_call_no_block { $$ = $1; }
-	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, { .expr_ident = $1} }; }
 ;
 
 expr_atom
-	: TOKEN_NIL { $$ = (expr){EXPR_NIL, {.expr_nil = {}}}; }
-	| TOKEN_INT { $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
-	| TOKEN_DOUBLE { $$ = (expr){ EXPR_DOUBLE, { .expr_double = $1 } }; }
-	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, { .expr_bool = true } }; }
-	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, { .expr_bool = false } }; }
-	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
+	: simple { $$ = $1; }
 	| expr_call { $$ = $1; }
-	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, { .expr_ident = $1} }; }
 	| expr_block { $$ = (expr){EXPR_BLOCK, { .expr_block = $1 } }; }
 ;
 
 expr_call
-	: expr_atom TOKEN_LPAREN args TOKEN_RPAREN
+	: expr_atom next_arena_expr args_len
 		{
 			$$ = (expr){
 				EXPR_CALL,
 				{
 					.expr_call = {
 						.expr_fun = ALLOC_EXPR($1),
-						.args = $3,
+						.args = $2,
+						.args_len = $3,
 					}
 				}
 			};
@@ -322,38 +321,46 @@ expr_call
 ;
 
 expr_call_no_block
-	: expr_atom_no_block TOKEN_LPAREN args TOKEN_RPAREN
+	: expr_atom_no_block next_arena_expr args_len
 		{
 			$$ = (expr){
 				EXPR_CALL,
 				{
 					.expr_call = {
 						.expr_fun = ALLOC_EXPR($1),
-						.args = $3,
+						.args = $2,
+						.args_len = $3,
 					}
 				}
 			};
 		}
 ;
 	
-args
-	: args_build maybe_comma
-		{
-			expr_vec res = expr_vec_copy(&parser_state->expr_vec_builder);
-			expr_vec_clear(&parser_state->expr_vec_builder);
-			$$ = res;
-		}
-	| /* empty */ { $$ = expr_vec_new(); }
+args_len
+	: TOKEN_LPAREN TOKEN_RPAREN { $$ = 0; }
+	| TOKEN_LPAREN args_len_internal maybe_comma TOKEN_RPAREN { $$ = $2; }
 ;
 
-args_build
-	: expr { expr_vec_push(&parser_state->expr_vec_builder, $1); }
-	| args_build ',' expr { expr_vec_push(&parser_state->expr_vec_builder, $3); }
+args_len_internal
+	: expr { expr_vec_push(&parser_state->ast_arena.expr_arena, $1); $$ = 1; }
+	| args_len_internal TOKEN_COMMA expr { expr_vec_push(&parser_state->ast_arena.expr_arena, $3); $$ = $1 + 1; }
 ;
+
+simple
+	: lit { $$ = $1; }
+	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
+
+lit
+	: TOKEN_NIL { $$ = (expr){EXPR_NIL, {.expr_nil = {}}}; }
+	| TOKEN_INT { $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
+	| TOKEN_DOUBLE { $$ = (expr){ EXPR_DOUBLE, { .expr_double = $1 } }; }
+	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, { .expr_bool = true } }; }
+	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, { .expr_bool = false } }; }
+	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, { .expr_ident = $1} }; }
 
 maybe_comma
-	: /* empty */ { }
-	| ',' { }
+	: %empty { }
+	| TOKEN_COMMA { }
 
 %%
 
