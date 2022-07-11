@@ -15,7 +15,7 @@
 #include <string.h>
 
 interpret_result interpret(char *s) {
-    cleanup(parser_state_free) parser_state parser_state = parser_state_new();
+    parser_state parser_state = parser_state_new();
     yyparse_expr_t res = parse_string_expr(s, &parser_state);
     if (res.yynerrs > 0) {
         return INTERPRET_PARSE_ERROR;
@@ -49,11 +49,6 @@ static void repl() {
 // }
 
 int main(int argc, const char *argv[]) {
-    if (getenv("LOX_PARSER_DEBUG") != NULL) {
-        extern int yydebug;
-        yydebug = 1;
-    }
-
     // run_lexer_debug();
     // interpret("2.0 + 1.0");
     repl();
