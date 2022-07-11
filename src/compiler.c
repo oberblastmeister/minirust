@@ -103,11 +103,12 @@ static void compile_stmt_let(compiler *compiler, stmt_let stmt_let) {
     local_map_insert(&scope->named_locals, name, create_local(compiler));
 }
 
-static local *compile_anon_local(compiler *compiler) {
+static local compile_anon_local(compiler *compiler) {
     emit_op(compiler, OP_NIL);
     scope *scope = scope_vec_last(&compiler->scopes);
     local local = create_local(compiler);
-    return local_vec_alloc(&scope->anon_locals, local);
+    local_vec_push(&scope->anon_locals, local);
+    return local;
 }
 
 #define EMIT_VAR_SIZED_OPCODE(compiler, op, arg, error_msg)                    \
@@ -125,18 +126,19 @@ static local *compile_anon_local(compiler *compiler) {
         emit_byte(compiler, (uint8_t)arg);                                     \
     }
 
-static void emit_load_local(compiler *compiler, int stack_slot) {
-    EMIT_VAR_SIZED_OPCODE(compiler, OP_LOAD_LOCAL, stack_slot,
+static void emit_load_local(compiler *compiler, local local) {
+    EMIT_VAR_SIZED_OPCODE(compiler, OP_LOAD_LOCAL, local.stack_slot,
                           "Too many locals");
 }
 
-static void emit_store_local(compiler *compiler, int stack_slot) {
-    EMIT_VAR_SIZED_OPCODE(compiler, OP_STORE_LOCAL, stack_slot,
+static void emit_store_local(compiler *compiler, local local) {
+    EMIT_VAR_SIZED_OPCODE(compiler, OP_STORE_LOCAL, local.stack_slot,
                           "Too many locals");
 }
 
 static void emit_pop_n(compiler *compiler, int n) {
     EMIT_VAR_SIZED_OPCODE(compiler, OP_POP_N, n, "Too many locals to pop");
+    compiler->stack_length -= n;
 }
 
 static void emit_constant(compiler *compiler, value value) {
@@ -178,15 +180,15 @@ static void compile_stmt(compiler *compiler, stmt stmt) {
 
 static void compile_expr_block(compiler *compiler, expr_block expr_block) {
     if (expr_block.last != NULL) {
-        local *anon_local = compile_anon_local(compiler);
+        local local = compile_anon_local(compiler);
         begin_scope(compiler);
         for (size_t i = 0; i < expr_block.stmts.len; i++) {
             compile_stmt(compiler, expr_block.stmts.data[i]);
         }
         compile_expr(compiler, expr_block.last);
-        emit_store_local(compiler, anon_local->stack_slot);
+        emit_store_local(compiler, local);
         end_scope(compiler);
-        emit_load_local(compiler, anon_local->stack_slot);
+        emit_load_local(compiler, local);
     } else {
         begin_scope(compiler);
         for (size_t i = 0; i < expr_block.stmts.len; i++) {
@@ -254,7 +256,7 @@ void compile_expr(compiler *compiler, expr *expr) {
             error(compiler, "Could not resolve variable");
             break;
         }
-        emit_load_local(compiler, local->stack_slot);
+        emit_load_local(compiler, *local);
         break;
     }
     case EXPR_BLOCK: {
