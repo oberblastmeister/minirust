@@ -267,6 +267,7 @@ next_arena_string
 expr_block
 	: next_arena_stmt TOKEN_LBRACE stmt_len TOKEN_RBRACE
 		{
+			printf("%x\n", $1);
 			$$ = (expr_block) {
 				.stmts = $1,
 				.stmts_len = $3,

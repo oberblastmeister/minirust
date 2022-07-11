@@ -4,6 +4,7 @@
 #include "macro_util.h"
 #include "prelude.h"
 #include "ptr.h"
+#include "slice.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -29,24 +30,20 @@ typedef struct {
 #define is_static
 #endif
 
-static void JOIN(VEC, maybe_resize_)(VEC *vec) {
+void JOIN(VEC, grow)(VEC *vec, size_t i) {
+    size_t cap = max((size_t)8, max(vec->cap * 2, vec->len + i));
     if (vec->cap == 0) {
-        vec->cap = 8;
-        vec->data = malloc(sizeof(VEC_TYPE) * 8);
+        vec->cap = cap;
+        vec->data = malloc(sizeof(VEC_TYPE) * cap);
         return;
     }
-    if (vec->cap == vec->len) {
-        int old_cap = vec->cap;
-        vec->cap = old_cap < 8 ? 8 : old_cap * 2;
-        vec->data = (VEC_TYPE *)realloc(vec->data, sizeof(VEC_TYPE) * vec->cap);
-    }
+    vec->cap = cap;
+    vec->data = (VEC_TYPE *)realloc(vec->data, sizeof(VEC_TYPE) * cap);
 }
 
 void JOIN(VEC, reserve)(VEC *vec, size_t i) {
     if (vec->len + i > vec->cap) {
-        vec->cap =
-            max((size_t)8, (size_t)next_power_of_2((uint64_t)vec->len + i));
-        vec->data = (VEC_TYPE *)realloc(vec->data, sizeof(VEC_TYPE) * vec->cap);
+        JOIN(VEC, grow)(vec, i);
     }
 }
 
@@ -72,7 +69,7 @@ is_static VEC JOIN(VEC, new)(void) {
 }
 
 is_static void JOIN(VEC, push)(VEC *vec, VEC_TYPE x) {
-    JOIN(VEC, maybe_resize_)(vec);
+    JOIN(VEC, reserve)(vec, 1);
     vec->data[vec->len] = x;
     vec->len++;
 }
@@ -141,7 +138,13 @@ is_static bool JOIN(VEC, eq)(VEC *v1, VEC *v2) {
 }
 
 is_static VEC_TYPE *JOIN(VEC, next_ptr)(VEC *vec) {
+    // make sure the next pointer is valid
+    JOIN(VEC, reserve)(vec, 1);
     return &vec->data[vec->len];
+}
+
+is_static slice JOIN(VEC, to_slice)(VEC vec) {
+    return (slice){vec.len, vec.data};
 }
 
 #ifndef VEC_EXTEND

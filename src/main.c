@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static interpret_result interpret(char *s) {
+interpret_result interpret(char *s) {
     cleanup(parser_state_free) parser_state parser_state = parser_state_new();
     yyparse_expr_t res = parse_string_expr(s, &parser_state);
     if (res.yynerrs > 0) {
