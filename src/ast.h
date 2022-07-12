@@ -1,8 +1,8 @@
 #ifndef _LOX_AST_H
 #define _LOX_AST_H
 
-#include "memory.h"
 #include "char_vec.h"
+#include "memory.h"
 #include "string_vec.h"
 #include "token_wrapper.h"
 #include "value.h"
@@ -31,6 +31,10 @@ struct stmt {
 #define VEC_TYPE stmt
 #include "vec_h.h"
 
+#define ARENA_TYPE stmt
+#define ARENA_VEC stmt_vec
+#include "arena_h.h"
+
 typedef struct {
     stmt_vec stmts;
     // can be null
@@ -39,6 +43,10 @@ typedef struct {
 
 #define VEC_TYPE expr
 #include "vec_h.h"
+
+#define ARENA_TYPE expr
+#define ARENA_VEC expr_vec
+#include "arena_h.h"
 
 typedef struct {
     enum {
@@ -93,6 +101,10 @@ struct if_cont {
 #define VEC_TYPE if_cont
 #include "vec_h.h"
 
+#define ARENA_TYPE if_cont
+#define ARENA_VEC if_cont_vec
+#include "arena_h.h"
+
 typedef struct {
     expr *cond;
     expr_block body;
@@ -101,7 +113,7 @@ typedef struct {
 typedef struct {
     expr *cond;
     expr_block then_expr;
-    if_cont cont;
+    if_cont *cont;
 } expr_if;
 
 typedef struct {
@@ -118,7 +130,8 @@ typedef struct {
     expr_vec args;
 } expr_call;
 
-typedef struct {} expr_nil;
+typedef struct {
+} expr_nil;
 struct expr {
     enum {
         EXPR_NIL,
@@ -171,13 +184,24 @@ typedef struct {
     decl_vec decls;
 } program;
 
+#define AST_MANAGED_LIST_X                                                     \
+    X(expr)                                                                    \
+    X(if_cont)                                                                 \
+    X(stmt)
+
 typedef struct {
-    expr_vec expr_arena;
-    if_cont_vec if_cont_arena;
+    expr_arena expr_arena;
+    if_cont_arena if_cont_arena;
 } ast_arena;
 
 ast_arena ast_arena_new(void);
 
 void ast_arena_free(ast_arena *ast_arena);
+
+void stmt_free(stmt *stmt);
+
+void if_cont_free(if_cont *cont);
+
+void expr_free(expr *expr);
 
 #endif

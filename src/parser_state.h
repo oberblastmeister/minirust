@@ -1,9 +1,9 @@
 #ifndef _LOX_PARSER_STATE_H
 #define _LOX_PARSER_STATE_H
 
+#include "ast.h"
 #include "lexer_state.h"
 #include "string_vec.h"
-#include "ast.h"
 
 typedef struct {
     int errors_amount;

@@ -27,6 +27,8 @@ void JOIN(VEC, init)(VEC *vec);
 
 VEC JOIN(VEC, new)(void);
 
+VEC JOIN(VEC, new_with_cap)(size_t cap);
+
 VEC JOIN(VEC, from_ptr_copied)(VEC_TYPE *p, size_t len);
 
 void JOIN(VEC, push)(VEC *vec, VEC_TYPE x);
@@ -43,9 +45,9 @@ size_t JOIN(VEC, len)(const VEC *vec);
 
 VEC JOIN(VEC, copy)(const VEC *vec);
 
-void JOIN(VEC, clear)(VEC *vec);
+VEC JOIN(VEC, take)(VEC *vec);
 
-VEC_TYPE *JOIN(VEC, alloc)(VEC *vec, VEC_TYPE t);
+void JOIN(VEC, clear)(VEC *vec);
 
 VEC_TYPE *JOIN(VEC, get_ptr)(VEC *vec, int i);
 

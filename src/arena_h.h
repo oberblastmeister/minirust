@@ -16,30 +16,29 @@
 #define ARENA_TYPE int
 #endif
 
-typedef struct {
-    size_t len;
-    size_t cap;
-    ARENA_TYPE *data;
-} ARENA_CHUNK;
+#ifndef ARENA_VEC
+#error "ARENA_VEC undefined"
+#include "int_vec.h"
+#define ARENA_VEC int_vec
+#endif
 
 typedef struct {
-    ARENA_CHUNK current;
+    ARENA_VEC current;
     size_t len;
     size_t cap;
-    slice *chunks;
+    ARENA_VEC *chunks;
 } ARENA;
 
 ARENA JOIN(ARENA, new)(void);
 
 void JOIN(ARENA, free)(ARENA *arena);
 
-void JOIN(ARENA, push_slice)(ARENA *arena, slice slice);
+void JOIN(ARENA, push_chunk)(ARENA *arena, ARENA_VEC chunk);
 
 ARENA_TYPE *JOIN(ARENA, alloc)(ARENA *arena, ARENA_TYPE t);
 
 #ifndef ARENA_EXTEND
 #undef ARENA
+#undef ARENA_VEC
 #undef ARENA_TYPE
-#undef ARENA_TYPE_FREE
-#undef ARENA_TYPE_COPY
 #endif

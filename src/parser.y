@@ -90,7 +90,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 %type<expr> expr_if expr_control_arg expr_no_control_arg expr_block_lift
 %type<expr> expr_atom_no_block expr_op_no_block expr_no_block expr_call_no_block
 %type<if_cont> if_cont
-%type<expr_block> expr_block expr_block_internal
+%type<expr_block> expr_block
 %type<string_vec_value> params
 %type<expr_vec> args
 
@@ -159,7 +159,7 @@ expr_if
 					.expr_if = {
 						.cond = ALLOC_EXPR($2),
 						.then_expr = $3,
-						.cont = $4,
+						.cont = if_cont_arena_alloc(&parser_state->ast_arena.if_cont_arena, $4),
 					}
 				}
 			};
@@ -177,7 +177,7 @@ if_cont
 					.cont_if_else = {
 						.cond = ALLOC_EXPR($3),
 						.body = $4,
-						.cont = if_cont_vec_alloc(&parser_state->ast_arena.if_cont_arena, $5),
+						.cont = if_cont_arena_alloc(&parser_state->ast_arena.if_cont_arena, $5),
 					}
 				}
 			};
@@ -201,12 +201,7 @@ expr_fun
 
 params
 	: /* empty */ { }
-	| params_build maybe_comma
-		{
-			string_vec res = string_vec_copy(&parser_state->string_vec_builder);
-			string_vec_clear(&parser_state->string_vec_builder);
-			$$ = res;
-		}
+	| params_build maybe_comma { $$ = string_vec_take(&parser_state->string_vec_builder); }
 ;
 
 params_build
@@ -253,15 +248,10 @@ expr_block_lift
 ; 
 
 expr_block
-	: expr_block_internal { stmt_vec_clear(&parser_state->stmt_vec_builder); $$ = $1; }
-;
-
-expr_block_internal
 	: TOKEN_LBRACE stmt_build TOKEN_RBRACE
 		{
-			printf("%x\n", $1);
 			$$ = (expr_block) {
-				.stmts = stmt_vec_copy(&parser_state->stmt_vec_builder),
+				.stmts = stmt_vec_take(&parser_state->stmt_vec_builder),
 				.last = NULL,
 			};
 		}
@@ -273,7 +263,7 @@ expr_block_internal
 	| TOKEN_LBRACE stmt_build expr_no_block TOKEN_RBRACE
 		{
 			$$ = (expr_block) {
-				.stmts = stmt_vec_copy(&parser_state->stmt_vec_builder),
+				.stmts = stmt_vec_take(&parser_state->stmt_vec_builder),
 				.last = ALLOC_EXPR($3),
 			};
 		}
@@ -338,12 +328,7 @@ expr_call_no_block
 ;
 	
 args
-	: args_build maybe_comma
-		{
-			expr_vec res = expr_vec_copy(&parser_state->expr_vec_builder);
-			expr_vec_clear(&parser_state->expr_vec_builder);
-			$$ = res;
-		}
+	: args_build maybe_comma { $$ = expr_vec_take(&parser_state->expr_vec_builder); }
 	| /* empty */ { $$ = expr_vec_new(); }
 ;
 

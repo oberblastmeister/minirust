@@ -1,4 +1,4 @@
-#define ALLOC_EXPR(e) expr_vec_alloc(&parser_state->ast_arena.expr_arena, (e))
+#define ALLOC_EXPR(e) expr_arena_alloc(&parser_state->ast_arena.expr_arena, (e))
 
 #define MAKE_EXPR_BIN(l, o, r)                                                 \
     (expr) {                                                                   \

@@ -68,6 +68,17 @@ is_static VEC JOIN(VEC, new)(void) {
     return (VEC){.len = 0, .cap = 0, .data = invalid_ptr(VEC_TYPE)};
 }
 
+is_static VEC JOIN(VEC, new_with_cap)(size_t cap) {
+    size_t cap2 = next_power_of_2(cap);
+    VEC_TYPE *data;
+    if (cap2 == 0) {
+        data = invalid_ptr(VEC_TYPE);
+    } else {
+        data = malloc(sizeof(VEC_TYPE) * cap2);
+    }
+    return (VEC){0, cap2, data};
+}
+
 is_static void JOIN(VEC, push)(VEC *vec, VEC_TYPE x) {
     JOIN(VEC, reserve)(vec, 1);
     vec->data[vec->len] = x;
@@ -123,13 +134,21 @@ is_static VEC JOIN(VEC, copy)(const VEC *vec) {
 }
 #endif
 
+is_static VEC JOIN(VEC, take)(VEC *vec) {
+    VEC_TYPE *data = malloc(sizeof(VEC_TYPE) * vec->cap);
+    memcpy(data, vec->data, sizeof(VEC_TYPE) * vec->len);
+    VEC taken = {.len = vec->len, .cap = vec->cap, .data = data};
+    JOIN(VEC, init)(vec);
+    return taken;
+}
+
 is_static VEC_TYPE *JOIN(VEC, get_ptr)(VEC *vec, int i) {
     return &vec->data[i];
 }
 
-is_static VEC_TYPE *JOIN(VEC, alloc)(VEC *vec, VEC_TYPE t) {
+is_static size_t JOIN(VEC, alloc)(VEC *vec, VEC_TYPE t) {
     JOIN(VEC, push)(vec, t);
-    return &vec->data[vec->len - 1];
+    return vec->len - 1;
 }
 
 is_static bool JOIN(VEC, eq)(VEC *v1, VEC *v2) {

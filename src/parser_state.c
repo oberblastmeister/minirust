@@ -15,8 +15,6 @@ parser_state parser_state_new(void) {
 
 ast_arena parser_state_free(parser_state *parser_state) {
     lexer_state_free(&parser_state->lexer_state);
-    stmt_vec_free(&parser_state->stmt_vec_builder);
-    string_vec_free(&parser_state->string_vec_builder);
-    expr_vec_free(&parser_state->expr_vec_builder);
+    // don't free the builders because the ownership has been given to the arena
     return parser_state->ast_arena;
 }
