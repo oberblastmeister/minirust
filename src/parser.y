@@ -122,7 +122,7 @@ stmt
 ;
 
 nothing
-	: /* EMPTY */ { }
+	: %empty { }
 
 expr_no_block
 	: expr_op_no_block { $$ = $1; }
@@ -167,7 +167,7 @@ expr_if
 ;
 
 if_cont
-	: /* empty */ { $$ = (if_cont){IF_CONT_NONE, {.cont_none = { } }}; }
+	: %empty { $$ = (if_cont){IF_CONT_NONE, {.cont_none = { } }}; }
 	| TOKEN_ELSE expr_block { $$ = (if_cont){IF_CONT_ELSE, {.cont_else = $2} }; }
 	| TOKEN_ELSE TOKEN_IF expr_no_control_arg expr_block if_cont	
 		{
@@ -200,7 +200,7 @@ expr_fun
 ;
 
 params
-	: /* empty */ { }
+	: %empty { }
 	| params_build maybe_comma { $$ = string_vec_take(&parser_state->string_vec_builder); }
 ;
 
@@ -270,7 +270,7 @@ expr_block
 ;
 	
 stmt_build
-	: /* empty */ { }
+	: %empty { }
 	| stmt_build stmt { stmt_vec_push(&parser_state->stmt_vec_builder, $2); }
 ;
 
@@ -329,7 +329,7 @@ expr_call_no_block
 	
 args
 	: args_build maybe_comma { $$ = expr_vec_take(&parser_state->expr_vec_builder); }
-	| /* empty */ { $$ = expr_vec_new(); }
+	| %empty { $$ = expr_vec_new(); }
 ;
 
 args_build
@@ -338,7 +338,7 @@ args_build
 ;
 
 maybe_comma
-	: /* empty */ { }
+	: %empty { }
 	| ',' { }
 
 %%
