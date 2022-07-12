@@ -46,6 +46,7 @@ typedef struct {
     int local_count;
     scope_vec scopes;
     chunk chunk;
+    obj *objects;
 } compiler;
 
 compiler compiler_new(void);
@@ -53,5 +54,7 @@ compiler compiler_new(void);
 void compile_expr(compiler *compiler, expr *expr);
 
 void compile_return(compiler *compiler, expr *expr);
+
+void compiler_free(compiler *compiler);
 
 #endif

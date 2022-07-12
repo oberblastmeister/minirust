@@ -217,9 +217,23 @@ static void compile_bin_expr(compiler *compiler, expr_bin expr_bin) {
     compile_expr(compiler, expr_bin.left);
     compile_expr(compiler, expr_bin.right);
     switch (expr_bin.op) {
-    case EXPR_OP_ADD: {
-        emit_byte(compiler, OP_ADD);
-        break;
+#define SIMPLE(OP_AST, OPCODE)                                                 \
+    case OP_AST: {                                                             \
+        emit_op(compiler, OPCODE);                                             \
+        break;                                                                 \
+    }
+
+        // clang-format off
+    SIMPLE(EXPR_OP_ADD, OP_ADD)
+    SIMPLE(EXPR_OP_SUB, OP_SUB)
+    SIMPLE(EXPR_OP_MUL, OP_MUL)
+    SIMPLE(EXPR_OP_DIV, OP_DIV)
+    SIMPLE(EXPR_OP_EQ, OP_EQ)
+    SIMPLE(EXPR_OP_NEQ, OP_NEQ)
+        // clang-format on
+
+#undef SIMPLE
+    case EXPR_OP_LT: {
     }
     default: {
         todo(compiler);
@@ -230,6 +244,10 @@ static void compile_bin_expr(compiler *compiler, expr_bin expr_bin) {
 
 void compile_expr(compiler *compiler, expr *expr) {
     switch (expr->tag) {
+    case EXPR_NIL: {
+        emit_op(compiler, OP_NIL);
+        break;
+    }
     case EXPR_INT: {
         emit_constant(compiler, value_int(expr->data.expr_int));
         break;
@@ -238,16 +256,18 @@ void compile_expr(compiler *compiler, expr *expr) {
         emit_constant(compiler, value_double(expr->data.expr_double));
         break;
     }
-    case EXPR_BIN: {
-        compile_bin_expr(compiler, expr->data.expr_bin);
+    case EXPR_STRING: {
+        string s = expr->data.expr_string;
+        emit_constant(compiler, value_obj((obj *)alloc_string(
+                                    s.data, s.len, &compiler->objects)));
         break;
     }
     case EXPR_BOOL: {
-        if (expr->data.expr_bool == true) {
-            emit_byte(compiler, OP_TRUE);
-        } else {
-            emit_byte(compiler, OP_FALSE);
-        }
+        emit_op(compiler, OP_FALSE + expr->data.expr_bool);
+        break;
+    }
+    case EXPR_BIN: {
+        compile_bin_expr(compiler, expr->data.expr_bin);
         break;
     }
     case EXPR_IDENT: {
@@ -282,11 +302,7 @@ compiler compiler_new(void) {
     scope_vec scopes = scope_vec_new();
     // initial scope
     scope_vec_push(&scopes, scope_new());
-    return (compiler){
-        .did_error = false,
-        .stack_length = 0,
-        .local_count = 0,
-        .scopes = scopes,
-        .chunk = chunk_new(),
-    };
+    return (compiler){false, 0, 0, scopes, chunk_new(), NULL};
 }
+
+void compiler_free(compiler *compiler) { scope_vec_free(&compiler->scopes); }

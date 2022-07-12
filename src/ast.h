@@ -139,6 +139,7 @@ struct expr {
         EXPR_DOUBLE,
         EXPR_BOOL,
         EXPR_BIN,
+        EXPR_STRING,
         EXPR_UNARY,
         EXPR_IF,
         EXPR_IF_ELSE,
@@ -155,6 +156,7 @@ struct expr {
         int expr_int;
         double expr_double;
         bool expr_bool;
+        string expr_string;
         expr_bin expr_bin;
         expr_unary expr_unary;
         expr_if expr_if;

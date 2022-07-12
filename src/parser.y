@@ -42,6 +42,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *ps, const char* m
 	expr_block expr_block;
 	expr_vec expr_vec;
 	if_cont if_cont;
+	value value;
 }
 
 // values
@@ -279,6 +280,7 @@ expr_atom_no_block
 	: lit
 	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
 	| expr_call_no_block { $$ = $1; }
+	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, {.expr_ident = $1}}; }
 ;
 
 expr_atom
@@ -286,6 +288,7 @@ expr_atom
 	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
 	| expr_call { $$ = $1; }
 	| expr_block { $$ = (expr){EXPR_BLOCK, { .expr_block = $1 } }; }
+	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, {.expr_ident = $1}}; }
 ;
 
 lit
@@ -294,7 +297,6 @@ lit
 	| TOKEN_DOUBLE { $$ = (expr){EXPR_DOUBLE, {.expr_double = $1}}; }
 	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, {.expr_bool = true}}; }
 	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, {.expr_bool = false}}; }
-	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, {.expr_ident = $1}}; }
 	| TOKEN_STRING { $$ = (expr){EXPR_STRING, {.expr_string = $1}}; }
 
 expr_call

@@ -2,6 +2,7 @@
 #define _LOX_VM_H
 
 #include "chunk.h"
+#include "value.h"
 
 #define STACK_MAX 256
 
@@ -10,6 +11,7 @@ typedef struct {
     uint8_t *ip;
     value *stack;
     value *stack_top;
+    obj *objects;
 } vm;
 
 typedef enum {
@@ -19,7 +21,7 @@ typedef enum {
     INTERPRET_RUNTIME_ERROR
 } interpret_result;
 
-vm vm_new(chunk chunk);
+vm vm_new(chunk chunk, obj *objects);
 
 void vm_free(vm *vm);
 

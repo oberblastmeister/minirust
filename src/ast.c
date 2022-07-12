@@ -90,6 +90,10 @@ void expr_free(expr *expr) {
         string_free(&expr->data.expr_ident);
         break;
     }
+    case EXPR_STRING: {
+        // don't free the string, as ownership has been passed to the vm
+        break;
+    }
     default: {
         break;
     }

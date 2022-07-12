@@ -10,9 +10,11 @@
     X(MUL, -1, 0)                                                              \
     X(DIV, -1, 0)                                                              \
     X(NEG, 0, 0)                                                               \
+    X(EQ, -1, 0)                                                               \
+    X(NEQ, -1, 0)                                                              \
     X(RET, 0, 0)                                                               \
-    X(TRUE, 1, 0)                                                              \
     X(FALSE, 1, 0)                                                             \
+    X(TRUE, 1, 0)                                                              \
     X(POP, -1, 0)                                                              \
     /* special opcode the stack is                                             \
     changed by n, 0 is just a placeholder */                                   \
@@ -36,4 +38,5 @@ extern const int op_arg_bytes[];
 extern const char *op_names[];
 
 extern const int op_amount;
+
 #endif

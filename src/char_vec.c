@@ -29,3 +29,12 @@ void string_hash(hasher *h, const string *s) {
     hash_size_t(h, &s->len);
     hash_bytes(h, s->data, s->len);
 }
+
+// damn you null terminated strings!
+void string_push(string *s, char c) {
+    char_vec_reserve(s, 1);
+    // replace the null character with our character
+    s->data[s->len - 1] = c;
+    // add null character back to the end, while incrementing the length
+    s->data[s->len++] = '\0';
+}

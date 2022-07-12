@@ -8,7 +8,7 @@
 #include "parser_state.h"
 #include "memory.h"
 
-#define PUSH_CHAR(b) char_vec_push(&ls.string_builder, b)
+#define PUSH_CHAR(b) string_push(&ls.string_builder, b)
 
 #define YY_USER_ACTION \
     yylloc->first_line = yylloc->last_line = ls.lexer_line; \
@@ -68,7 +68,7 @@ IDENT_START {ALPHA}|"_"
     return TOKEN_STRING;
 }
 <STRING_SC>. {
-    // only supports ascii, so only one byte
+    // flex only supports ascii, so . should match one byte
     PUSH_CHAR(yytext[0]);
 }
 <STRING_SC>\\t { PUSH_CHAR('\t'); }

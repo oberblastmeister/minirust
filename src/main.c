@@ -21,14 +21,14 @@ interpret_result interpret(char *s) {
         return INTERPRET_PARSE_ERROR;
     }
     expr expr = res.yyvalue;
-    compiler compiler = compiler_new();
+    cleanup(compiler_free) compiler compiler = compiler_new();
     compile_expr(&compiler, &expr);
     compile_return(&compiler, NULL);
     if (compiler.did_error) {
         return INTERPRET_COMPILE_ERROR;
     }
     disassemble_chunk(&compiler.chunk, "repl");
-    cleanup(vm_free) vm vm = vm_new(compiler.chunk);
+    cleanup(vm_free) vm vm = vm_new(compiler.chunk, compiler.objects);
     return vm_run(&vm);
 }
 

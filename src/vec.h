@@ -81,8 +81,7 @@ is_static VEC JOIN(VEC, new_with_cap)(size_t cap) {
 
 is_static void JOIN(VEC, push)(VEC *vec, VEC_TYPE x) {
     JOIN(VEC, reserve)(vec, 1);
-    vec->data[vec->len] = x;
-    vec->len++;
+    vec->data[vec->len++] = x;
 }
 
 is_static VEC_TYPE *JOIN(VEC, last)(const VEC *vec) {
@@ -130,7 +129,7 @@ is_static VEC JOIN(VEC, copy)(const VEC *vec) {
 is_static VEC JOIN(VEC, copy)(const VEC *vec) {
     VEC_TYPE *data = malloc(sizeof(VEC_TYPE) * vec->cap);
     memcpy(data, vec->data, sizeof(VEC_TYPE) * vec->len);
-    return (VEC){.len = vec->len, .cap = vec->cap, .data = data};
+    return (VEC){vec->len,  vec->cap,  data};
 }
 #endif
 
