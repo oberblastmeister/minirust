@@ -206,7 +206,7 @@ params
 
 params_build
 	: TOKEN_IDENT { string_vec_push(&parser_state->string_vec_builder, $1); }
-	| params_build ',' TOKEN_IDENT { string_vec_push(&parser_state->string_vec_builder, $3); }
+	| params_build TOKEN_COMMA TOKEN_IDENT { string_vec_push(&parser_state->string_vec_builder, $3); }
 ;
 
 expr_op_no_block
@@ -328,18 +328,18 @@ expr_call_no_block
 ;
 	
 args
-	: args_build maybe_comma { $$ = expr_vec_take(&parser_state->expr_vec_builder); }
-	| %empty { $$ = expr_vec_new(); }
+	: %empty { $$ = expr_vec_new(); }
+	| args_build maybe_comma { $$ = expr_vec_take(&parser_state->expr_vec_builder); }
 ;
 
 args_build
 	: expr { expr_vec_push(&parser_state->expr_vec_builder, $1); }
-	| args_build ',' expr { expr_vec_push(&parser_state->expr_vec_builder, $3); }
+	| args_build TOKEN_COMMA expr { expr_vec_push(&parser_state->expr_vec_builder, $3); }
 ;
 
 maybe_comma
 	: %empty { }
-	| ',' { }
+	| TOKEN_COMMA { }
 
 %%
 
