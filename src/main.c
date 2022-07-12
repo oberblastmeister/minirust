@@ -49,6 +49,10 @@ static void repl() {
 // }
 
 int main(int argc, const char *argv[]) {
+    if (getenv("LOX_PARSER_DEBUG") != NULL) {
+        extern int yydebug;
+        yydebug = 1;
+    }
     // run_lexer_debug();
     // interpret("2.0 + 1.0");
     repl();
