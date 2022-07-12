@@ -108,6 +108,7 @@ static local compile_anon_local(compiler *compiler) {
     scope *scope = scope_vec_last(&compiler->scopes);
     local local = create_local(compiler);
     local_vec_push(&scope->anon_locals, local);
+    printf("anon with: %d\n", local.stack_slot);
     return local;
 }
 
@@ -147,6 +148,7 @@ static void emit_constant(compiler *compiler, value value) {
 }
 
 static void begin_scope(compiler *compiler) {
+    printf("begin_scope\n");
     scope scope = scope_new();
     scope_vec_push(&compiler->scopes, scope);
 }
@@ -155,6 +157,7 @@ static void end_scope(compiler *compiler) {
     scope scope = scope_vec_pop(&compiler->scopes);
     // TODO: we need to account for same scope shadowing
     size_t num_locals = scope.anon_locals.len + scope.named_locals.len;
+    printf("emitting popn: %ld\n", num_locals);
     emit_pop_n(compiler, num_locals);
     scope_free(&scope);
     compiler->local_count -= (int)num_locals;
@@ -292,7 +295,7 @@ void compile_expr(compiler *compiler, expr *expr) {
 
 void compile_return(compiler *compiler, expr *expr) {
     if (expr == NULL) {
-        emit_byte(compiler, OP_RET);
+        emit_op(compiler, OP_RET);
     } else {
         todo(compiler);
     }
