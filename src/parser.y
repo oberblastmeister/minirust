@@ -1,12 +1,13 @@
 // based on https://stackoverflow.com/questions/48850242/thread-safe-reentrant-bison-flex
 
+%define parse.trace
 %define parse.error detailed
 %define api.pure full
 %locations
 // parameter for both the parser and lexer
 %param { yyscan_t scanner }
 // parser parameter
-%parse-param { parser_state *parser_state }
+%parse-param { parser_state *ps }
 
 %code top {
 #include <stdio.h>
@@ -27,7 +28,7 @@ typedef void* yyscan_t;
 }
 %code {
 int yylex(YYSTYPE* yylvalp, YYLTYPE* yyllocp, yyscan_t scanner);
-void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, const char* msg);
+void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *ps, const char* msg);
 }
 
 %union {
@@ -86,7 +87,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *parser_state, con
 
 %type<decl> decl
 %type<stmt> stmt
-%type<expr> expr expr_op expr_atom expr_fun expr_call
+%type<expr> expr expr_op expr_atom expr_fun expr_call lit
 %type<expr> expr_if expr_control_arg expr_no_control_arg expr_block_lift
 %type<expr> expr_atom_no_block expr_op_no_block expr_no_block expr_call_no_block
 %type<if_cont> if_cont
@@ -159,7 +160,7 @@ expr_if
 					.expr_if = {
 						.cond = ALLOC_EXPR($2),
 						.then_expr = $3,
-						.cont = if_cont_arena_alloc(&parser_state->ast_arena.if_cont_arena, $4),
+						.cont = if_cont_arena_alloc(&ps->ast_arena.if_cont_arena, $4),
 					}
 				}
 			};
@@ -177,7 +178,7 @@ if_cont
 					.cont_if_else = {
 						.cond = ALLOC_EXPR($3),
 						.body = $4,
-						.cont = if_cont_arena_alloc(&parser_state->ast_arena.if_cont_arena, $5),
+						.cont = if_cont_arena_alloc(&ps->ast_arena.if_cont_arena, $5),
 					}
 				}
 			};
@@ -201,12 +202,12 @@ expr_fun
 
 params
 	: %empty { }
-	| params_build maybe_comma { $$ = string_vec_take(&parser_state->string_vec_builder); }
+	| params_build maybe_comma { $$ = string_vec_take(&ps->string_vec_builder); }
 ;
 
 params_build
-	: TOKEN_IDENT { string_vec_push(&parser_state->string_vec_builder, $1); }
-	| params_build TOKEN_COMMA TOKEN_IDENT { string_vec_push(&parser_state->string_vec_builder, $3); }
+	: TOKEN_IDENT { string_vec_push(&ps->string_vec_builder, $1); }
+	| params_build TOKEN_COMMA TOKEN_IDENT { string_vec_push(&ps->string_vec_builder, $3); }
 ;
 
 expr_op_no_block
@@ -251,7 +252,7 @@ expr_block
 	: TOKEN_LBRACE stmt_build TOKEN_RBRACE
 		{
 			$$ = (expr_block) {
-				.stmts = stmt_vec_take(&parser_state->stmt_vec_builder),
+				.stmts = stmt_vec_take(&ps->stmt_vec_builder),
 				.last = NULL,
 			};
 		}
@@ -263,7 +264,7 @@ expr_block
 	| TOKEN_LBRACE stmt_build expr_no_block TOKEN_RBRACE
 		{
 			$$ = (expr_block) {
-				.stmts = stmt_vec_take(&parser_state->stmt_vec_builder),
+				.stmts = stmt_vec_take(&ps->stmt_vec_builder),
 				.last = ALLOC_EXPR($3),
 			};
 		}
@@ -271,31 +272,30 @@ expr_block
 	
 stmt_build
 	: %empty { }
-	| stmt_build stmt { stmt_vec_push(&parser_state->stmt_vec_builder, $2); }
+	| stmt_build stmt { stmt_vec_push(&ps->stmt_vec_builder, $2); }
 ;
 
 expr_atom_no_block
-	: TOKEN_NIL { $$ = (expr){EXPR_NIL, {.expr_nil = {}}}; }
-	| TOKEN_INT { $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
-	| TOKEN_DOUBLE { $$ = (expr){ EXPR_DOUBLE, { .expr_double = $1 } }; }
-	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, { .expr_bool = true } }; }
-	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, { .expr_bool = false } }; }
+	: lit
 	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
 	| expr_call_no_block { $$ = $1; }
-	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, { .expr_ident = $1} }; }
 ;
 
 expr_atom
-	: TOKEN_NIL { $$ = (expr){EXPR_NIL, {.expr_nil = {}}}; }
-	| TOKEN_INT { $$ = (expr){ EXPR_INT, { .expr_int = $1 } }; }
-	| TOKEN_DOUBLE { $$ = (expr){ EXPR_DOUBLE, { .expr_double = $1 } }; }
-	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, { .expr_bool = true } }; }
-	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, { .expr_bool = false } }; }
+	: lit
 	| TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
 	| expr_call { $$ = $1; }
-	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, { .expr_ident = $1} }; }
 	| expr_block { $$ = (expr){EXPR_BLOCK, { .expr_block = $1 } }; }
 ;
+
+lit
+	: TOKEN_NIL { $$ = (expr){EXPR_NIL, {.expr_nil = {}}}; }
+	| TOKEN_INT { $$ = (expr){EXPR_INT, {.expr_int = $1}}; }
+	| TOKEN_DOUBLE { $$ = (expr){EXPR_DOUBLE, {.expr_double = $1}}; }
+	| TOKEN_TRUE { $$ = (expr){ EXPR_BOOL, {.expr_bool = true}}; }
+	| TOKEN_FALSE { $$ = (expr){ EXPR_BOOL, {.expr_bool = false}}; }
+	| TOKEN_IDENT { $$ = (expr){EXPR_IDENT, {.expr_ident = $1}}; }
+	| TOKEN_STRING { $$ = (expr){EXPR_STRING, {.expr_string = $1}}; }
 
 expr_call
 	: expr_atom TOKEN_LPAREN args TOKEN_RPAREN
@@ -329,12 +329,12 @@ expr_call_no_block
 	
 args
 	: %empty { $$ = expr_vec_new(); }
-	| args_build maybe_comma { $$ = expr_vec_take(&parser_state->expr_vec_builder); }
+	| args_build maybe_comma { $$ = expr_vec_take(&ps->expr_vec_builder); }
 ;
 
 args_build
-	: expr { expr_vec_push(&parser_state->expr_vec_builder, $1); }
-	| args_build TOKEN_COMMA expr { expr_vec_push(&parser_state->expr_vec_builder, $3); }
+	: expr { expr_vec_push(&ps->expr_vec_builder, $1); }
+	| args_build TOKEN_COMMA expr { expr_vec_push(&ps->expr_vec_builder, $3); }
 ;
 
 maybe_comma
@@ -343,35 +343,35 @@ maybe_comma
 
 %%
 
-void parse_file(FILE *in, parser_state *parser_state) {
+void parse_file(FILE *in, parser_state *ps) {
 	yyscan_t scanner;          
-  	yylex_init_extra(parser_state, &scanner);
+  	yylex_init_extra(ps, &scanner);
 	yyset_in(in, scanner);
-	int res = yyparse(parser_state, scanner);
+	int res = yyparse(ps, scanner);
 	yylex_destroy(scanner);
 }
 
-yyparse_expr_t parse_string_expr(const char *s, parser_state *parser_state) {
+yyparse_expr_t parse_string_expr(const char *s, parser_state *ps) {
 	yyscan_t scanner;          
-  	yylex_init_extra(parser_state, &scanner);
+  	yylex_init_extra(ps, &scanner);
 	YY_BUFFER_STATE buf = yy_scan_string(s, scanner);
-	yyparse_expr_t res = yyparse_expr(scanner, parser_state);
+	yyparse_expr_t res = yyparse_expr(scanner, ps);
 	yy_delete_buffer(buf, scanner);
 	yylex_destroy(scanner);
 	return res;
 }
 	
-void yyerror(YYLTYPE* yyllocp, __attribute__((unused)) yyscan_t scanner, parser_state *parser_state, const char *s) {
+void yyerror(YYLTYPE* yyllocp, __attribute__((unused)) yyscan_t scanner, parser_state *ps, const char *s) {
 	// don't print too many errors
-	if (parser_state->errors_amount > 4) {
+	if (ps->errors_amount > 4) {
 		return;
 	}
 	fprintf(stderr, "%d:%d: Parse error: %s", yyllocp->first_line, yyllocp->first_column, s);
-	char *last_error = parser_state->lexer_state.last_error.data;
+	char *last_error = ps->lexer_state.last_error.data;
 	if (last_error[0] != '\0') {
 		fprintf(stderr, ": %s\n", last_error);
 	} else {
 		puts("");
 	}
-	parser_state->errors_amount++;
+	ps->errors_amount++;
 }

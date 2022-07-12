@@ -8,13 +8,15 @@
 #include "parser_state.h"
 #include "memory.h"
 
-#define PUSH_CHAR(b) char_vec_push(&yyextra->lexer_state.string_builder, b)
+#define PUSH_CHAR(b) char_vec_push(&ls.string_builder, b)
 
 #define YY_USER_ACTION \
-    yylloc->first_line = yylloc->last_line = yyextra->lexer_state.lexer_line; \
-    yylloc->first_column = yyextra->lexer_state.lexer_column; \
-    yylloc->last_column = yyextra->lexer_state.lexer_column + yyleng - 1; \
-    yyextra->lexer_state.lexer_column += yyleng;
+    yylloc->first_line = yylloc->last_line = ls.lexer_line; \
+    yylloc->first_column = ls.lexer_column; \
+    yylloc->last_column = ls.lexer_column + yyleng - 1; \
+    ls.lexer_column += yyleng;
+
+#define ls yyextra->lexer_state
 %}
 
 %option reentrant
@@ -34,8 +36,8 @@ IDENT_START {ALPHA}|"_"
 
 [ \t\r] { } // ignore all whitespace
 \n {
-    yyextra->lexer_state.lexer_column = 1;
-    yyextra->lexer_state.lexer_line++;
+    ls.lexer_column = 1;
+    ls.lexer_line++;
 }
 "{" { return TOKEN_LBRACE; }
 "}" { return TOKEN_RBRACE; }
@@ -57,12 +59,12 @@ IDENT_START {ALPHA}|"_"
 "<" { return TOKEN_LT; }
 "<=" { return TOKEN_LT_EQ; }
 \" {
-    string_clear(&yyextra->lexer_state.string_builder);
+    string_clear(&ls.string_builder);
     BEGIN(STRING_SC);
 }
 <STRING_SC>\" {
-    yylval->string_value = string_copy(&yyextra->lexer_state.string_builder);
-    BEGIN(0);
+    yylval->string_value = string_copy(&ls.string_builder);
+    BEGIN(INITIAL);
     return TOKEN_STRING;
 }
 <STRING_SC>. {
@@ -74,6 +76,16 @@ IDENT_START {ALPHA}|"_"
 <STRING_SC>\\\\ { PUSH_CHAR('\\'); }
 <STRING_SC>\\n { PUSH_CHAR('\n'); }
 <STRING_SC>\\\" { PUSH_CHAR('\"'); }
+<STRING_SC>\\. { 
+    ls.last_error = const_string_new("Invalid escape sequence");
+    BEGIN(INITIAL);
+    return TOKEN_ERROR;
+}
+<STRING_SC>\n {
+    ls.last_error = const_string_new("Invalid newline in string");
+    BEGIN(INITIAL);
+    return TOKEN_ERROR;
+}
 nil { return TOKEN_NIL; }
 and { return TOKEN_AND; }
 or { return TOKEN_OR; }
@@ -106,7 +118,7 @@ this { return TOKEN_THIS; }
     return TOKEN_IDENT;
 }
 . {
-    yyextra->lexer_state.last_error = const_string_new("Unknown token");
+    ls.last_error = const_string_new("Unknown token");
     return TOKEN_ERROR;
 }
 
