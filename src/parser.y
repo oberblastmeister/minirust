@@ -76,7 +76,8 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *ps, const char* m
 %destructor { string_free(&$$); } <string_value>
 
 // precedence
-%left TOKEN_RETURN
+%precedence LOWEST_PREC
+%precedence TOKEN_RETURN
 %nonassoc TOKEN_EQ_EQ TOKEN_BANG_EQ
 %nonassoc TOKEN_GT TOKEN_GT_EQ
 %nonassoc TOKEN_LT TOKEN_LT_EQ
@@ -85,9 +86,12 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *ps, const char* m
 %left TOKEN_PLUS TOKEN_MINUS
 %left TOKEN_STAR TOKEN_SLASH
 %left TOKEN_BANG
+// this is needed so that if a block ends with a blocklike,
+// it becomes the last expression instead of a stmt with a semicolon omitted
+%precedence TOKEN_RBRACE
 
 %type<decl> decl
-%type<stmt> stmt stmt_no_block
+%type<stmt> stmt
 %type<expr> expr expr_op expr_atom expr_fun expr_call lit blocklike
 %type<expr> expr_if expr_control_arg expr_no_control_arg expr_block_lift
 %type<expr> expr_atom_no_block expr_op_no_block expr_no_block expr_call_no_block
@@ -106,12 +110,8 @@ decl
 ;
 	 
 stmt
-	: stmt_no_block { $$ = $1; }
-	| blocklike { $$ = (stmt){STMT_EXPR, {.stmt_expr = ALLOC_EXPR($1)}}; }
-;
-
-stmt_no_block
 	: expr_no_block TOKEN_SEMI { $$ = (stmt){ STMT_EXPR, { .stmt_expr = ALLOC_EXPR($1) } }; }
+	| %prec LOWEST_PREC blocklike { $$ = (stmt){STMT_EXPR, {.stmt_expr = ALLOC_EXPR($1)}}; }
 	| stmt TOKEN_SEMI { $$ = $1; }
 	| TOKEN_LET TOKEN_IDENT TOKEN_EQ expr TOKEN_SEMI
 		{
@@ -125,6 +125,7 @@ stmt_no_block
 				}
 			};
 		}
+;
 
 nothing
 	: %empty { }
@@ -257,49 +258,38 @@ expr_block_lift
 ; 
 
 expr_block
-	: TOKEN_LBRACE stmt_build_no_block_end blocklike TOKEN_RBRACE
-		{
-			$$ = (expr_block) {
-				.stmts = stmt_vec_take(&ps->stmt_vec_builder),
-				.last = ALLOC_EXPR($3),
-			};
-		}
-	| TOKEN_LBRACE stmt_build_no_block_end TOKEN_RBRACE
+	: TOKEN_LBRACE stmt_build TOKEN_RBRACE
 		{
 			$$ = (expr_block) {
 				.stmts = stmt_vec_take(&ps->stmt_vec_builder),
 				.last = NULL,
 			};
 		}
-	/* : TOKEN_LBRACE stmt_build TOKEN_RBRACE
-		{
-			$$ = (expr_block) {
-				.stmts = stmt_vec_take(&ps->stmt_vec_builder),
-				.last = NULL,
-			};
-		} */
 	// must use expr_no_block here to make sure there is no reduce reduce conflict
 	// TOKEN_NIL . TOKEN_LPAREN
 	// don't know whether to reduce TOKEN_NIL to expr or expr_no_block
 	// this depends on whether there is a semicolon in the future, but we don't know that
 	// we can only have one lookahead
-	/* | TOKEN_LBRACE stmt_build expr_no_block TOKEN_RBRACE
+	| TOKEN_LBRACE stmt_build expr_no_block TOKEN_RBRACE
 		{
 			$$ = (expr_block) {
 				.stmts = stmt_vec_take(&ps->stmt_vec_builder),
 				.last = ALLOC_EXPR($3),
 			};
-		} */
+		}
+	| TOKEN_LBRACE stmt_build blocklike TOKEN_RBRACE
+		{
+			$$ = (expr_block) {
+				.stmts = stmt_vec_take(&ps->stmt_vec_builder),
+				.last = ALLOC_EXPR($3),
+			};
+		}
 ;
 	
 stmt_build
 	: %empty { }
 	| stmt_build stmt { stmt_vec_push(&ps->stmt_vec_builder, $2); }
 ;
-
-stmt_build_no_block_end
-	: %empty { }
-	| stmt_build stmt_no_block { stmt_vec_push(&ps->stmt_vec_builder, $2); }  
 
 expr_atom_no_block
 	: lit
