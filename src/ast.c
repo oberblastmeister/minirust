@@ -100,10 +100,30 @@ void expr_free(expr *expr) {
     }
 }
 
+static void lvalue_free(lvalue *lvalue) {
+    switch (lvalue->tag) {
+    case LVALUE_IDENT: {
+        string_free(&lvalue->lvalue_ident);
+        break;
+    }
+    default: {
+        break;
+    }
+    }
+}
+
+static void stmt_set_free(stmt_set *stmt_set) {
+    lvalue_free(&stmt_set->lvalue);
+}
+
 void stmt_free(stmt *stmt) {
     switch (stmt->tag) {
     case STMT_LET: {
         string_free(&stmt->data.stmt_let.name);
+        break;
+    }
+    case STMT_SET: {
+        stmt_set_free(&stmt->data.stmt_set);
         break;
     }
     default: {

@@ -44,6 +44,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *ps, const char* m
 	expr_vec expr_vec;
 	if_cont if_cont;
 	value value;
+	lvalue lvalue;
 }
 
 // values
@@ -93,7 +94,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *ps, const char* m
 %precedence HIGHEST_PREC
 
 %type<decl> decl
-%type<stmt> stmt
+%type<stmt> stmt stmt_let stmt_set
 %type<expr> expr expr_op expr_atom expr_fun expr_call lit blocklike
 %type<expr> expr_if expr_control_arg expr_no_control_arg expr_block_lift
 %type<expr> expr_atom_no_block expr_op_no_block expr_no_block expr_call_no_block
@@ -102,6 +103,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *ps, const char* m
 %type<string_vec_value> params string_vec_take
 %type<expr_vec> args expr_vec_take
 %type<stmt_vec> stmt_vec_take
+%type<lvalue> lvalue
 
 %start decl stmt expr expr_atom expr_block
 %start expr_fun nothing
@@ -116,7 +118,12 @@ stmt
 	: expr_no_block TOKEN_SEMI { $$ = (stmt){ STMT_EXPR, { .stmt_expr = ALLOC_EXPR($1) } }; }
 	| %prec LOWEST_PREC blocklike { $$ = (stmt){STMT_EXPR, {.stmt_expr = ALLOC_EXPR($1)}}; }
 	| stmt TOKEN_SEMI { $$ = $1; }
-	| TOKEN_LET TOKEN_IDENT TOKEN_EQ expr TOKEN_SEMI
+	| stmt_let { $$ = $1; }
+	| stmt_set { $$ = $1; }
+;
+
+stmt_let
+	: TOKEN_LET TOKEN_IDENT TOKEN_EQ expr TOKEN_SEMI
 		{
 			$$ = (stmt) {
 				STMT_LET,
@@ -128,7 +135,12 @@ stmt
 				}
 			};
 		}
-;
+
+stmt_set
+	: lvalue TOKEN_EQ expr TOKEN_SEMI { $$ = (stmt){STMT_SET, {.stmt_set = {.lvalue = $1, .expr = ALLOC_EXPR($3)}}}; }
+	
+lvalue
+	: TOKEN_IDENT { $$ = (lvalue){LVALUE_IDENT, .lvalue_ident = $1}; }
 
 nothing
 	: %empty { }

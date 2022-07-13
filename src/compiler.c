@@ -163,9 +163,39 @@ static void end_scope(compiler *compiler) {
     compiler->local_count -= (int)num_locals;
 }
 
+/**
+ * @return The pointer to the local. May be NULL.
+ */
+static local *resolve_local(compiler *compiler, string *name) {
+    for (size_t i = compiler->scopes.len; i-- > 0;) {
+        scope *scope = &compiler->scopes.data[i];
+        local *local = local_map_get_ptr(&scope->named_locals, name);
+        if (local != NULL) {
+            return local;
+        }
+    }
+    return NULL;
+}
+
 static void compile_stmt_expr(compiler *compiler, expr *expr) {
     compile_expr(compiler, expr);
     emit_op(compiler, OP_POP);
+}
+
+static void compile_stmt_set(compiler *compiler, stmt_set set) {
+    compile_expr(compiler, set.expr);
+    lvalue lvalue = set.lvalue;
+    switch (lvalue.tag) {
+    case LVALUE_IDENT: {
+        local *local = resolve_local(compiler, &lvalue.lvalue_ident);
+        if (local == NULL) {
+            error(compiler, "Could not resolve variable in set statement");
+            break;
+        }
+        emit_store_local(compiler, *local);
+        break;
+    }
+    }
 }
 
 static void compile_stmt(compiler *compiler, stmt stmt) {
@@ -176,6 +206,10 @@ static void compile_stmt(compiler *compiler, stmt stmt) {
     }
     case STMT_LET: {
         compile_stmt_let(compiler, stmt.data.stmt_let);
+        break;
+    }
+    case STMT_SET: {
+        compile_stmt_set(compiler, stmt.data.stmt_set);
         break;
     }
     }
@@ -200,20 +234,6 @@ static void compile_expr_block(compiler *compiler, expr_block expr_block) {
         end_scope(compiler);
         emit_op(compiler, OP_NIL);
     }
-}
-
-/**
- * @return The pointer to the local. May be NULL.
- */
-static local *resolve_local(compiler *compiler, string *name) {
-    for (size_t i = compiler->scopes.len; i-- > 0;) {
-        scope *scope = &compiler->scopes.data[i];
-        local *local = local_map_get_ptr(&scope->named_locals, name);
-        if (local != NULL) {
-            return local;
-        }
-    }
-    return NULL;
 }
 
 static void compile_bin_expr(compiler *compiler, expr_bin expr_bin) {

@@ -17,14 +17,31 @@ typedef struct {
     expr *expr;
 } stmt_let;
 
+typedef struct {
+    enum {
+        LVALUE_IDENT,
+    } tag;
+    union {
+        string lvalue_ident;
+    };
+} lvalue;
+
+typedef struct {
+    lvalue lvalue;
+    expr *expr;
+} stmt_set;
+
+
 struct stmt {
     enum {
         STMT_EXPR,
         STMT_LET,
+        STMT_SET,
     } tag;
     union {
         expr *stmt_expr;
         stmt_let stmt_let;
+        stmt_set stmt_set;
     } data;
 };
 
