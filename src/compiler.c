@@ -1,5 +1,6 @@
 #include "compiler.h"
 #include "ast.h"
+#include "object.h"
 #include "opcode.h"
 #include "stdarg.h"
 #include <stdio.h>
@@ -281,7 +282,7 @@ void compile_expr(compiler *compiler, expr *expr) {
     }
     case EXPR_STRING: {
         string s = expr->data.expr_string;
-        emit_constant(compiler, value_obj((obj *)alloc_string(
+        emit_constant(compiler, value_obj((obj *)obj_string_new(
                                     s.data, s.len, &compiler->objects)));
         break;
     }

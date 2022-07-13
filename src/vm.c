@@ -1,5 +1,6 @@
 #include "vm.h"
 #include "io_ext.h"
+#include "object.h"
 #include "opcode.h"
 #include "read_bytes.h"
 #include "value.h"
