@@ -30,14 +30,16 @@
 
 ast_arena ast_arena_new(void) {
     return (ast_arena){
-        expr_arena_new(),
-        if_cont_arena_new(),
+#define X(T) T##_arena_new(),
+        ARENA_LIST_X
+#undef X
     };
 }
 
 void ast_arena_free(ast_arena *ast_arena) {
-    expr_arena_free(&ast_arena->expr_arena);
-    if_cont_arena_free(&ast_arena->if_cont_arena);
+#define X(T) T##_arena_free(&ast_arena->T##_arena);
+    ARENA_LIST_X
+#undef X
 }
 
 void expr_block_free(expr_block *block) { stmt_vec_free(&block->stmts); }

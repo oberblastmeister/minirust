@@ -31,7 +31,6 @@ typedef struct {
     expr *expr;
 } stmt_set;
 
-
 struct stmt {
     enum {
         STMT_EXPR,
@@ -203,14 +202,14 @@ typedef struct {
     decl_vec decls;
 } program;
 
-#define AST_MANAGED_LIST_X                                                     \
+#define ARENA_LIST_X                                                           \
     X(expr)                                                                    \
-    X(if_cont)                                                                 \
-    X(stmt)
+    X(if_cont)
 
 typedef struct {
-    expr_arena expr_arena;
-    if_cont_arena if_cont_arena;
+#define X(T) T##_arena T##_arena;
+    ARENA_LIST_X
+#undef X
 } ast_arena;
 
 ast_arena ast_arena_new(void);
