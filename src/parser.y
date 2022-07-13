@@ -38,6 +38,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *ps, const char* m
 	string_vec string_vec_value;
 	expr expr;
 	stmt stmt;
+	stmt_vec stmt_vec;
 	decl decl;
 	expr_block expr_block;
 	expr_vec expr_vec;
@@ -89,6 +90,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *ps, const char* m
 // this is needed so that if a block ends with a blocklike,
 // it becomes the last expression instead of a stmt with a semicolon omitted
 %precedence TOKEN_RBRACE
+%precedence HIGHEST_PREC
 
 %type<decl> decl
 %type<stmt> stmt
@@ -97,8 +99,9 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *ps, const char* m
 %type<expr> expr_atom_no_block expr_op_no_block expr_no_block expr_call_no_block
 %type<if_cont> if_cont
 %type<expr_block> expr_block
-%type<string_vec_value> params
-%type<expr_vec> args
+%type<string_vec_value> params string_vec_take
+%type<expr_vec> args expr_vec_take
+%type<stmt_vec> stmt_vec_take
 
 %start decl stmt expr expr_atom expr_block
 %start expr_fun nothing
@@ -209,9 +212,12 @@ expr_fun
 		}
 ;
 
+string_vec_take
+	: %empty { $$ = string_vec_take(&ps->string_vec_builder); }
+
 params
 	: %empty { }
-	| params_build maybe_comma { $$ = string_vec_take(&ps->string_vec_builder); }
+	| string_vec_take params_build maybe_comma string_vec_take { $$ = $4; ps->string_vec_builder = $1; }
 ;
 
 params_build
@@ -258,37 +264,43 @@ expr_block_lift
 ; 
 
 expr_block
-	: TOKEN_LBRACE stmt_build TOKEN_RBRACE
+	: stmt_vec_take TOKEN_LBRACE stmts_build TOKEN_RBRACE
 		{
-			$$ = (expr_block) {
+			$$ = (expr_block){
 				.stmts = stmt_vec_take(&ps->stmt_vec_builder),
 				.last = NULL,
 			};
+			ps->stmt_vec_builder = $1;
 		}
 	// must use expr_no_block here to make sure there is no reduce reduce conflict
 	// TOKEN_NIL . TOKEN_LPAREN
 	// don't know whether to reduce TOKEN_NIL to expr or expr_no_block
 	// this depends on whether there is a semicolon in the future, but we don't know that
 	// we can only have one lookahead
-	| TOKEN_LBRACE stmt_build expr_no_block TOKEN_RBRACE
+	| stmt_vec_take TOKEN_LBRACE stmts_build expr_no_block TOKEN_RBRACE
 		{
-			$$ = (expr_block) {
+			$$ = (expr_block){
 				.stmts = stmt_vec_take(&ps->stmt_vec_builder),
-				.last = ALLOC_EXPR($3),
+				.last = ALLOC_EXPR($4),
 			};
+			ps->stmt_vec_builder = $1;
 		}
-	| TOKEN_LBRACE stmt_build blocklike TOKEN_RBRACE
+	| stmt_vec_take TOKEN_LBRACE stmts_build blocklike TOKEN_RBRACE
 		{
-			$$ = (expr_block) {
+			$$ = (expr_block){
 				.stmts = stmt_vec_take(&ps->stmt_vec_builder),
-				.last = ALLOC_EXPR($3),
+				.last = ALLOC_EXPR($4),
 			};
+			ps->stmt_vec_builder = $1;
 		}
 ;
+
+stmt_vec_take
+	: %empty { $$ = stmt_vec_take(&ps->stmt_vec_builder); }
 	
-stmt_build
+stmts_build
 	: %empty { }
-	| stmt_build stmt { stmt_vec_push(&ps->stmt_vec_builder, $2); }
+	| stmts_build stmt { stmt_vec_push(&ps->stmt_vec_builder, $2); }
 ;
 
 expr_atom_no_block
@@ -344,9 +356,12 @@ expr_call_no_block
 		}
 ;
 	
+expr_vec_take
+	: %empty { $$ = expr_vec_take(&ps->expr_vec_builder); }
+
 args
 	: %empty { $$ = expr_vec_new(); }
-	| args_build maybe_comma { $$ = expr_vec_take(&ps->expr_vec_builder); }
+	| expr_vec_take args_build maybe_comma expr_vec_take { $$ = $4; ps->expr_vec_builder = $1; }
 ;
 
 args_build
