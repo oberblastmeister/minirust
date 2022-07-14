@@ -220,6 +220,12 @@ void stmt_free(stmt *stmt);
 
 void if_cont_free(if_cont *cont);
 
+void expr_block_free(expr_block *block);
+
 void expr_free(expr *expr);
+
+void decl_free(decl *decl);
+
+void lvalue_free(lvalue *lvalue);
 
 #endif

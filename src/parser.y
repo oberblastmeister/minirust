@@ -76,6 +76,15 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *ps, const char* m
 
 // used during error recovery
 %destructor { string_free(&$$); } <string_value>
+%destructor { string_vec_free(&$$); } <string_vec_value>
+%destructor { stmt_vec_free(&$$); } <stmt_vec>
+%destructor { stmt_free(&$$); } <stmt>
+%destructor { expr_free(&$$); } <expr>
+%destructor { expr_block_free(&$$); } <expr_block>
+%destructor { expr_vec_free(&$$); } <expr_vec>
+%destructor { if_cont_free(&$$); } <if_cont>
+%destructor { decl_free(&$$); } <decl>
+%destructor { lvalue_free(&$$); } <lvalue>
 
 // precedence
 %precedence LOWEST_PREC
@@ -228,7 +237,7 @@ string_vec_take
 	: %empty { $$ = string_vec_take(&ps->string_vec_builder); }
 
 params
-	: %empty { }
+	: %empty { $$ = string_vec_new(); }
 	| string_vec_take params_build maybe_comma string_vec_take { $$ = $4; ps->string_vec_builder = $1; }
 ;
 

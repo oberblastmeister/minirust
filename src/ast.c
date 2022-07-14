@@ -102,13 +102,10 @@ void expr_free(expr *expr) {
     }
 }
 
-static void lvalue_free(lvalue *lvalue) {
+void lvalue_free(lvalue *lvalue) {
     switch (lvalue->tag) {
     case LVALUE_IDENT: {
         string_free(&lvalue->lvalue_ident);
-        break;
-    }
-    default: {
         break;
     }
     }
@@ -129,6 +126,15 @@ void stmt_free(stmt *stmt) {
         break;
     }
     default: {
+        break;
+    }
+    }
+}
+
+void decl_free(decl *decl) {
+    switch (decl->tag) {
+    case DECL_STMT: {
+        stmt_free(&decl->decl_stmt);
         break;
     }
     }
