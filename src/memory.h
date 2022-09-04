@@ -1,5 +1,4 @@
-#ifndef _LOX_MEMORY_H
-#define _LOX_MEMORY_H
+#pragma once
 
 #include <stdlib.h>
 
@@ -17,5 +16,3 @@ void cleanup_free(void *p);
             func(*p);                                                          \
     }                                                                          \
     struct __useless_struct_to_allow_trailing_semicolon__
-
-#endif

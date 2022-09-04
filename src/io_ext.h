@@ -1,6 +1,3 @@
-#ifndef _LOX_IO_EXT_H
-#define _LOX_IO_EXT_H
+#pragma once
 
 void put(char *s);
-
-#endif

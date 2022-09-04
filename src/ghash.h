@@ -1,5 +1,4 @@
-#ifndef _LOX_GHASH_H
-#define _LOX_GHASH_H
+#pragma once
 
 #include "hash.h"
 #include "char_vec.h"
@@ -28,5 +27,3 @@
         )(_h, _t); \
     })
 // clang-format on
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef _LOX_PARSER_STATE_H
-#define _LOX_PARSER_STATE_H
+#pragma once
 
 #include "ast.h"
 #include "lexer_state.h"
@@ -24,5 +23,3 @@ parser_state parser_state_new(void);
 ast_arena parser_state_free(parser_state *parser_state);
 
 void parser_state_free_all(parser_state *parser_state);
-
-#endif

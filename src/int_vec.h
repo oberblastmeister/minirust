@@ -1,7 +1,4 @@
-#ifndef _LOX_INT_VEC_H
-#define _LOX_INT_VEC_H
+#pragma once
 
 #define VEC_TYPE int
 #include "vec_h.h"
-
-#endif

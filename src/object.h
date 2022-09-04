@@ -1,5 +1,4 @@
-#ifndef _LOX_OBJECT_H
-#define _LOX_OBJECT_H
+#pragma once
 
 #include "chunk.h"
 #include "prelude.h"
@@ -63,5 +62,3 @@ static inline obj_fun *value_as_fun(value value) {
 static inline bool value_is_fun(value value) {
     return is_obj_type(value, OBJ_FUN);
 }
-
-#endif

@@ -1,7 +1,6 @@
 // see https://github.com/rust-lang/rustc-hash
 
-#ifndef _LOX_HASH_H
-#define _LOX_HASH_H
+#pragma once
 
 #include "bits.h"
 #include "prelude.h"
@@ -69,5 +68,3 @@ static inline void hash_bytes(hasher *h, const char *bytes, size_t len) {
 static inline hasher hasher_new(void) { return (hasher){.hash = 0}; }
 
 static inline hash hasher_finish(hasher h) { return (hash)h.hash; }
-
-#endif

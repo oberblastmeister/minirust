@@ -1,5 +1,4 @@
-#ifndef _LOX_SLICE_H
-#define _LOX_SLICE_H
+#pragma once
 
 #include <stddef.h>
 
@@ -9,4 +8,3 @@ typedef struct {
 } slice;
 
 void slice_free(slice *slice, void (*free_elem)(void *));
-#endif

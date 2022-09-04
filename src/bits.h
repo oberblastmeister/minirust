@@ -1,5 +1,4 @@
-#ifndef _LOX_BITS_H
-#define _LOX_BITS_H
+#pragma once
 
 #include "prelude.h"
 #include <assert.h>
@@ -65,5 +64,3 @@ MAKE_ROT(uint64_t)
                  : rotr32(_n, _c), uint64_t                                    \
                  : rotr64(_n, _c));                                            \
     })
-
-#endif

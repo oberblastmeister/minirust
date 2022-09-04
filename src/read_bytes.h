@@ -1,5 +1,4 @@
-#ifndef _LOX_READ
-#define _LOX_READ
+#pragma once
 
 #include "prelude.h"
 #include <string.h>
@@ -17,5 +16,3 @@ _MAKE_READER(uint32_t)
 _MAKE_READER(uint64_t)
 
 #undef _MAKE_READER
-
-#endif

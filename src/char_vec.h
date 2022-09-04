@@ -1,6 +1,4 @@
-#ifndef _LOX_STRING_VEC_H
-
-#define _LOX_STRING_VEC_H
+#pragma once
 
 #include "hash.h"
 #define VEC_TYPE char
@@ -25,5 +23,3 @@ bool string_eq(const string *s1, const string *s2);
 void string_hash(hasher *h, const string *s);
 
 void string_push(string *s, char c);
-
-#endif

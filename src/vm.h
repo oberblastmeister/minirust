@@ -1,5 +1,4 @@
-#ifndef _LOX_VM_H
-#define _LOX_VM_H
+#pragma once
 
 #include "chunk.h"
 #include "object.h"
@@ -43,5 +42,3 @@ void vm_push(vm *vm, value value);
 value vm_pop(vm *vm);
 
 void vm_print_stack(vm *vm);
-
-#endif

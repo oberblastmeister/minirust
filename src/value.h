@@ -1,5 +1,4 @@
-#ifndef _LOX_VALUE_H
-#define _LOX_VALUE_H
+#pragma once
 
 #include "char_vec.h"
 #include "prelude.h"
@@ -86,5 +85,3 @@ static inline bool value_equal(value v1, value v2) {
 #undef EQ_SIMPLE
 #undef X
 }
-
-#endif

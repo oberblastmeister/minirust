@@ -1,5 +1,4 @@
-#ifndef _LOX_AST_H
-#define _LOX_AST_H
+#pragma once
 
 #include "char_vec.h"
 #include "memory.h"
@@ -236,5 +235,3 @@ void expr_free(expr *expr);
 void decl_free(decl *decl);
 
 void lvalue_free(lvalue *lvalue);
-
-#endif

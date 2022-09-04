@@ -1,5 +1,4 @@
-#ifndef _LOX_MACRO_UTIL_H
-#define _LOX_MACRO_UTIL_H
+#pragma once
 
 #define CAT(a, b) a##b
 
@@ -7,5 +6,3 @@
 
 #define JOIN(prefix, name) PASTE(prefix, PASTE(_, name))
 #define _JOIN(prefix, name) PASTE(_, PASTE(prefix, PASTE(_, name)))
-
-#endif

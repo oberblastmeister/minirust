@@ -1,3 +1,5 @@
+#pragma once
+
 #include "lexer_state.h"
 #include "parser_state.h"
 #include <stdio.h>

@@ -1,5 +1,4 @@
-#ifndef _TYPES_LIST_X_H
-#define _TYPES_LIST_X_H
+#pragma once
 
 #define INT_LIKE_LIST_X                                                        \
     X(uint8_t)                                                                 \
@@ -9,5 +8,3 @@
     X(int)                                                                     \
     X(long)                                                                    \
     X(bool)
-
-#endif

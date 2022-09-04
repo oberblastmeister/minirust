@@ -1,5 +1,4 @@
-#ifndef _LOX_PTR_H
-#define _LOX_PTR_H
+#pragma once
 
 #include <stdalign.h>
 #include <string.h>
@@ -20,5 +19,3 @@
         memset(&t, 0, sizeof(T));                                              \
         t;                                                                     \
     })
-
-#endif

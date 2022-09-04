@@ -1,5 +1,4 @@
-#ifndef _LOX_LEXER_WRAPPER_H
-#define _LOX_LEXER_WRAPPER_H
+#pragma once
 
 // make sure the necessary imports are before #include "lexer.h"
 // flex doesn't generate the header with the correct imports
@@ -13,5 +12,3 @@
 #include "lexer.h"
 
 void run_lexer_debug(void);
-
-#endif

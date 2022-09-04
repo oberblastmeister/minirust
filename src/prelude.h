@@ -1,5 +1,4 @@
-#ifndef _LOX_PRELUDE_H
-#define _LOX_PRELUDE_H
+#pragma once
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -25,5 +24,3 @@
         _swap_tmp = (Y);                                                       \
         (Y) = _swap_tmp;                                                       \
     })
-
-#endif

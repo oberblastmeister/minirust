@@ -1,3 +1,5 @@
+#pragma once
+
 #define ALLOC_EXPR(e) expr_arena_alloc(&ps->ast_arena.expr_arena, (e))
 
 #define MAKE_EXPR_BIN(l, o, r)                                                 \

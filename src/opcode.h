@@ -1,5 +1,4 @@
-#ifndef _LOX_OPCODE_H
-#define _LOX_OPCODE_H
+#pragma once
 
 #define OPCODE_LIST_X                                                          \
     X(CONST, 1, 1)                                                             \
@@ -40,5 +39,3 @@ extern const int op_arg_bytes[];
 extern const char *op_names[];
 
 extern const int op_amount;
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef _LOX_GEQ_H
-#define _LOX_GEQ_H
+#pragma once
 
 #include "prelude.h"
 #include "types_list_x.h"
@@ -27,5 +26,3 @@ INT_LIKE_LIST_X
         )(_x, _y); \
     })
 // clang-format on
-
-#endif

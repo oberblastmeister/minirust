@@ -1,6 +1,3 @@
-#ifndef _LOX_VEC_UTIL_H
-#define _LOX_VEC_UTIL_H
+#pragma once
 
 #include "ptr.h"
-
-#endif

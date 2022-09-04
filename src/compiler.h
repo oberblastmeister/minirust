@@ -1,5 +1,4 @@
-#ifndef _LOX_COMPILER_H
-#define _LOX_COMPILER_H
+#pragma once
 
 #include "ast.h"
 #include "char_vec.h"
@@ -56,5 +55,3 @@ void compile_expr(compiler *compiler, expr *expr);
 void compile_return(compiler *compiler, expr *expr);
 
 void compiler_free(compiler *compiler);
-
-#endif
