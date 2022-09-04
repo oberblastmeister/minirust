@@ -22,6 +22,7 @@ typedef struct obj_fun {
     obj obj;
     int arity;
     chunk chunk;
+    // may be NULL;
     char *name;
 } obj_fun;
 

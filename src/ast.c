@@ -125,6 +125,12 @@ void stmt_free(stmt *stmt) {
         stmt_set_free(&stmt->data.stmt_set);
         break;
     }
+    case STMT_FUN: {
+        stmt_fun stmt_fun = stmt->data.stmt_fun;
+        string_free(&stmt_fun.name);
+        string_vec_free(&stmt_fun.params);
+        break;
+    }
     default: {
         break;
     }

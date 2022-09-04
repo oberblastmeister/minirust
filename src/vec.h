@@ -31,7 +31,7 @@ typedef struct {
 #endif
 
 void JOIN(VEC, grow)(VEC *vec, size_t i) {
-    size_t cap = max((size_t)8, max(vec->cap * 2, vec->len + i));
+    size_t cap = max((size_t)4, max(vec->cap * 2, vec->len + i));
     if (vec->cap == 0) {
         vec->cap = cap;
         vec->data = malloc(sizeof(VEC_TYPE) * cap);

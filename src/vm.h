@@ -2,11 +2,22 @@
 #define _LOX_VM_H
 
 #include "chunk.h"
+#include "object.h"
 #include "value.h"
 
 #define STACK_MAX 256
 
 typedef struct {
+    obj_fun *fun;
+    uint8_t *ip;
+    value *stack;
+} call_frame;
+
+#define VEC_TYPE call_frame
+#include "vec_h.h"
+
+typedef struct {
+    call_frame_vec frames;
     chunk chunk;
     uint8_t *ip;
     value *stack;

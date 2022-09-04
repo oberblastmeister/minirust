@@ -7,8 +7,12 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#define VEC_TYPE call_frame
+#include "vec.h"
+
 vm vm_new(chunk chunk, obj *objects) {
-    vm vm = {.chunk = chunk,
+    vm vm = {.frames = call_frame_vec_new(),
+             .chunk = chunk,
              .ip = chunk.instructions.data,
              .stack = calloc(STACK_MAX, sizeof(value)),
              .objects = objects};

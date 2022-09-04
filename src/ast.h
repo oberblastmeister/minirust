@@ -31,16 +31,25 @@ typedef struct {
     expr *expr;
 } stmt_set;
 
+typedef struct {
+    string name;
+    string_vec params;
+    // has to be expr_block type
+    expr *body;
+} stmt_fun;
+
 struct stmt {
     enum {
         STMT_EXPR,
         STMT_LET,
         STMT_SET,
+        STMT_FUN,
     } tag;
     union {
         expr *stmt_expr;
         stmt_let stmt_let;
         stmt_set stmt_set;
+        stmt_fun stmt_fun;
     } data;
 };
 

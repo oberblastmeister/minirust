@@ -23,7 +23,9 @@
     X(LOAD_LOCAL, 1, 1)                                                        \
     X(LOAD_LOCAL_16, 1, 2)                                                     \
     X(STORE_LOCAL, -1, 1)                                                      \
-    X(STORE_LOCAL_16, -1, 2)
+    X(STORE_LOCAL_16, -1, 2)                                                   \
+    /* stack decreased by n */                                                 \
+    X(CALL, 0, 1)
 
 typedef enum {
 #define X(name, _, __) OP_##name,

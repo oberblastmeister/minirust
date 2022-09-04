@@ -103,7 +103,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t scanner, parser_state *ps, const char* m
 %precedence HIGHEST_PREC
 
 %type<decl> decl
-%type<stmt> stmt stmt_let stmt_set
+%type<stmt> stmt stmt_let stmt_set stmt_fun
 %type<expr> expr expr_op expr_atom expr_fun expr_call lit blocklike
 %type<expr> expr_if expr_control_arg expr_no_control_arg expr_block_lift
 %type<expr> expr_atom_no_block expr_op_no_block expr_no_block expr_call_no_block
@@ -129,6 +129,7 @@ stmt
 	| stmt TOKEN_SEMI { $$ = $1; }
 	| stmt_let { $$ = $1; }
 	| stmt_set { $$ = $1; }
+	| stmt_fun { $$ = $1; }
 ;
 
 stmt_let
@@ -150,6 +151,21 @@ stmt_set
 	
 lvalue
 	: TOKEN_IDENT { $$ = (lvalue){LVALUE_IDENT, .lvalue_ident = $1}; }
+
+stmt_fun
+	: TOKEN_FUN TOKEN_IDENT TOKEN_LPAREN params TOKEN_RPAREN expr_block_lift
+		{
+			$$ = (stmt){
+				STMT_FUN,
+				{
+					.stmt_fun = {
+						.name = $2,
+						.params = $4,
+						.body = ALLOC_EXPR($6),
+					}
+				}
+			};
+		}
 
 nothing
 	: %empty { }

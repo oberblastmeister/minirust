@@ -199,6 +199,10 @@ static void compile_stmt_set(compiler *compiler, stmt_set set) {
     }
 }
 
+static void compile_stmt_fun(compiler *compiler, stmt_fun fun) {
+    todo(compiler);
+}
+
 static void compile_stmt(compiler *compiler, stmt stmt) {
     switch (stmt.tag) {
     case STMT_EXPR: {
@@ -211,6 +215,10 @@ static void compile_stmt(compiler *compiler, stmt stmt) {
     }
     case STMT_SET: {
         compile_stmt_set(compiler, stmt.data.stmt_set);
+        break;
+    }
+    case STMT_FUN: {
+        compile_stmt_fun(compiler, stmt.data.stmt_fun);
         break;
     }
     }
