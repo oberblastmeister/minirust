@@ -1,6 +1,6 @@
 [
  {
-  "directory": "/home/brian/projects/lox",
+  "directory": "/home/brian/projects/minirust",
   "arguments": [
    "gcc",
    "-Wextra",
@@ -10,18 +10,19 @@
    "./target/gen/include",
    "-I",
    "./src",
+   "-g",
    "-MMD",
    "-MF",
-   "./target/dep/main.d",
+   "./target/dep/asprintf.d",
    "-c",
    "-o",
-   "target/obj/main.o",
-   "src/main.c"
+   "target/obj/asprintf.o",
+   "src/asprintf.c"
   ],
-  "file": "src/main.c"
+  "file": "src/asprintf.c"
  },
  {
-  "directory": "/home/brian/projects/lox",
+  "directory": "/home/brian/projects/minirust",
   "arguments": [
    "gcc",
    "-Wextra",
@@ -31,6 +32,7 @@
    "./target/gen/include",
    "-I",
    "./src",
+   "-g",
    "-MMD",
    "-MF",
    "./target/dep/ast.d",
@@ -42,7 +44,7 @@
   "file": "src/ast.c"
  },
  {
-  "directory": "/home/brian/projects/lox",
+  "directory": "/home/brian/projects/minirust",
   "arguments": [
    "gcc",
    "-Wextra",
@@ -52,252 +54,7 @@
    "./target/gen/include",
    "-I",
    "./src",
-   "-MMD",
-   "-MF",
-   "./target/dep/chunk.d",
-   "-c",
-   "-o",
-   "target/obj/chunk.o",
-   "src/chunk.c"
-  ],
-  "file": "src/chunk.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-I",
-   "./target/gen/include",
-   "-I",
-   "./src",
-   "-MMD",
-   "-MF",
-   "./target/dep/debug.d",
-   "-c",
-   "-o",
-   "target/obj/debug.o",
-   "src/debug.c"
-  ],
-  "file": "src/debug.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-I",
-   "./target/gen/include",
-   "-I",
-   "./src",
-   "-MMD",
-   "-MF",
-   "./target/dep/int_vec.d",
-   "-c",
-   "-o",
-   "target/obj/int_vec.o",
-   "src/int_vec.c"
-  ],
-  "file": "src/int_vec.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-I",
-   "./target/gen/include",
-   "-I",
-   "./src",
-   "-MMD",
-   "-MF",
-   "./target/dep/io_extra.d",
-   "-c",
-   "-o",
-   "target/obj/io_extra.o",
-   "src/io_extra.c"
-  ],
-  "file": "src/io_extra.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-I",
-   "./target/gen/include",
-   "-I",
-   "./src",
-   "-MMD",
-   "-MF",
-   "./target/dep/lexer_state.d",
-   "-c",
-   "-o",
-   "target/obj/lexer_state.o",
-   "src/lexer_state.c"
-  ],
-  "file": "src/lexer_state.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-I",
-   "./target/gen/include",
-   "-I",
-   "./src",
-   "-MMD",
-   "-MF",
-   "./target/dep/memory.d",
-   "-c",
-   "-o",
-   "target/obj/memory.o",
-   "src/memory.c"
-  ],
-  "file": "src/memory.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-I",
-   "./target/gen/include",
-   "-I",
-   "./src",
-   "-MMD",
-   "-MF",
-   "./target/dep/parser_state.d",
-   "-c",
-   "-o",
-   "target/obj/parser_state.o",
-   "src/parser_state.c"
-  ],
-  "file": "src/parser_state.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-I",
-   "./target/gen/include",
-   "-I",
-   "./src",
-   "-MMD",
-   "-MF",
-   "./target/dep/uint8_t_vec.d",
-   "-c",
-   "-o",
-   "target/obj/uint8_t_vec.o",
-   "src/uint8_t_vec.c"
-  ],
-  "file": "src/uint8_t_vec.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-I",
-   "./target/gen/include",
-   "-I",
-   "./src",
-   "-MMD",
-   "-MF",
-   "./target/dep/value.d",
-   "-c",
-   "-o",
-   "target/obj/value.o",
-   "src/value.c"
-  ],
-  "file": "src/value.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-I",
-   "./target/gen/include",
-   "-I",
-   "./src",
-   "-MMD",
-   "-MF",
-   "./target/dep/vm.d",
-   "-c",
-   "-o",
-   "target/obj/vm.o",
-   "src/vm.c"
-  ],
-  "file": "src/vm.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-I",
-   "./target/gen/include",
-   "-I",
-   "./src",
-   "-c",
-   "-o",
-   "target/obj/lexer.o",
-   "target/gen/src/lexer.c"
-  ],
-  "file": "target/gen/src/lexer.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-I",
-   "./target/gen/include",
-   "-I",
-   "./src",
-   "-c",
-   "-o",
-   "target/obj/parser.o",
-   "target/gen/src/parser.c"
-  ],
-  "file": "target/gen/src/parser.c"
- },
- {
-  "directory": "/home/brian/projects/lox",
-  "arguments": [
-   "gcc",
-   "-Wextra",
-   "-Wall",
-   "-std=gnu17",
-   "-I",
-   "./target/gen/include",
-   "-I",
-   "./src",
+   "-g",
    "-MMD",
    "-MF",
    "./target/dep/bits.d",
@@ -309,7 +66,7 @@
   "file": "src/bits.c"
  },
  {
-  "directory": "/home/brian/projects/lox",
+  "directory": "/home/brian/projects/minirust",
   "arguments": [
    "gcc",
    "-Wextra",
@@ -319,18 +76,19 @@
    "./target/gen/include",
    "-I",
    "./src",
+   "-g",
    "-MMD",
    "-MF",
-   "./target/dep/hash.d",
+   "./target/dep/char_vec.d",
    "-c",
    "-o",
-   "target/obj/hash.o",
-   "src/hash.c"
+   "target/obj/char_vec.o",
+   "src/char_vec.c"
   ],
-  "file": "src/hash.c"
+  "file": "src/char_vec.c"
  },
  {
-  "directory": "/home/brian/projects/lox",
+  "directory": "/home/brian/projects/minirust",
   "arguments": [
    "gcc",
    "-Wextra",
@@ -340,6 +98,315 @@
    "./target/gen/include",
    "-I",
    "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/chunk.d",
+   "-c",
+   "-o",
+   "target/obj/chunk.o",
+   "src/chunk.c"
+  ],
+  "file": "src/chunk.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/compiler.d",
+   "-c",
+   "-o",
+   "target/obj/compiler.o",
+   "src/compiler.c"
+  ],
+  "file": "src/compiler.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/debug.d",
+   "-c",
+   "-o",
+   "target/obj/debug.o",
+   "src/debug.c"
+  ],
+  "file": "src/debug.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/driver.d",
+   "-c",
+   "-o",
+   "target/obj/driver.o",
+   "src/driver.c"
+  ],
+  "file": "src/driver.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/int_int_map.d",
+   "-c",
+   "-o",
+   "target/obj/int_int_map.o",
+   "src/int_int_map.c"
+  ],
+  "file": "src/int_int_map.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/int_vec.d",
+   "-c",
+   "-o",
+   "target/obj/int_vec.o",
+   "src/int_vec.c"
+  ],
+  "file": "src/int_vec.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/io_ext.d",
+   "-c",
+   "-o",
+   "target/obj/io_ext.o",
+   "src/io_ext.c"
+  ],
+  "file": "src/io_ext.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/lexer_state.d",
+   "-c",
+   "-o",
+   "target/obj/lexer_state.o",
+   "src/lexer_state.c"
+  ],
+  "file": "src/lexer_state.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/main.d",
+   "-c",
+   "-o",
+   "target/obj/main.o",
+   "src/main.c"
+  ],
+  "file": "src/main.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/memory.d",
+   "-c",
+   "-o",
+   "target/obj/memory.o",
+   "src/memory.c"
+  ],
+  "file": "src/memory.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/object.d",
+   "-c",
+   "-o",
+   "target/obj/object.o",
+   "src/object.c"
+  ],
+  "file": "src/object.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/opcode.d",
+   "-c",
+   "-o",
+   "target/obj/opcode.o",
+   "src/opcode.c"
+  ],
+  "file": "src/opcode.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/parser_state.d",
+   "-c",
+   "-o",
+   "target/obj/parser_state.o",
+   "src/parser_state.c"
+  ],
+  "file": "src/parser_state.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/slice.d",
+   "-c",
+   "-o",
+   "target/obj/slice.o",
+   "src/slice.c"
+  ],
+  "file": "src/slice.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
    "-MMD",
    "-MF",
    "./target/dep/string_vec.d",
@@ -351,7 +418,7 @@
   "file": "src/string_vec.c"
  },
  {
-  "directory": "/home/brian/projects/lox",
+  "directory": "/home/brian/projects/minirust",
   "arguments": [
    "gcc",
    "-Wextra",
@@ -361,14 +428,97 @@
    "./target/gen/include",
    "-I",
    "./src",
+   "-g",
    "-MMD",
    "-MF",
-   "./target/dep/test.d",
+   "./target/dep/uint8_t_vec.d",
    "-c",
    "-o",
-   "target/obj/test.o",
-   "src/test.c"
+   "target/obj/uint8_t_vec.o",
+   "src/uint8_t_vec.c"
   ],
-  "file": "src/test.c"
+  "file": "src/uint8_t_vec.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/value.d",
+   "-c",
+   "-o",
+   "target/obj/value.o",
+   "src/value.c"
+  ],
+  "file": "src/value.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-MMD",
+   "-MF",
+   "./target/dep/vm.d",
+   "-c",
+   "-o",
+   "target/obj/vm.o",
+   "src/vm.c"
+  ],
+  "file": "src/vm.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-c",
+   "-o",
+   "target/obj/lexer.o",
+   "target/gen/src/lexer.c"
+  ],
+  "file": "target/gen/src/lexer.c"
+ },
+ {
+  "directory": "/home/brian/projects/minirust",
+  "arguments": [
+   "gcc",
+   "-Wextra",
+   "-Wall",
+   "-std=gnu17",
+   "-I",
+   "./target/gen/include",
+   "-I",
+   "./src",
+   "-g",
+   "-c",
+   "-o",
+   "target/obj/parser.o",
+   "target/gen/src/parser.c"
+  ],
+  "file": "target/gen/src/parser.c"
  }
 ]
